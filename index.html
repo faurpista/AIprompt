@@ -20,11 +20,22 @@
 
         <!-- Beállítások panel -->
         <div class="bg-gray-800 p-4 rounded-xl mb-6 border border-gray-700 shadow-md">
-            <label class="block text-sm font-medium text-gray-400 mb-1">Groq API Kulcs (Llama 3 használatához):</label>
-            <input type="password" id="apiKey" placeholder="gsk_..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
-            <p class="text-xs text-gray-500 mt-1">A kulcsod közvetlenül a Groq API-hoz beszél, nem mentődik el sehova.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">API Kulcs:</label>
+                    <input type="password" id="apiKey" placeholder="..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Válassz modellt:</label>
+                    <select id="modelSelect" class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        <option value="meta-llama/llama-4-scout-17b-16e-instruct">meta-llama/llama-4-scout-17b-16e-instruct</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">A kulcsod közvetlenül a kiválasztott API-hoz beszél, nem mentődvén el sehova.</p>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Bal oldal: Prompt írás -->
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
@@ -99,7 +110,7 @@
             const aiResponseDiv = document.getElementById('aiResponse');
 
             if (!apiKey) {
-                alert('Kérlek, add meg a Groq API kulcsodat!');
+                alert('Kérlek, add meg a megfelelő API kulcsodat!');
                 return;
             }
             if (!userPrompt) {
@@ -113,26 +124,65 @@
             aiResponseDiv.innerText = "Gondolkodom...";
 
             try {
-                // 1. LÉPÉS: Megnézzük, mit válaszolna a Llama a felhasználó promptjára
-                const originalRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [{ role: "user", content: userPrompt }]
-                    })
-                });
+               // 1. LÉPÉS: Adatok kinyerése a felületről
+const selectedModel = document.getElementById("modelSelect").value;
+let originalResponseText = ""; // Ebben tároljuk majd a kapott szöveget
 
-                if (!originalRes.ok) {
-                    const errData = await originalRes.json().catch(() => ({}));
-                    throw new Error(`API Hiba (${originalRes.status}): ${errData.error?.message || 'Nem sikerült azonosítani a hibát.'}`);
-                }
+if (selectedModel.includes("gemini")) {
+    // --- GEMINI NATÍV BÖNGÉSZŐS HÍVÁS (CORS-barát, nem kell proxy) ---
+    // Az API kulcsot a Google biztonságosan, URL paraméterként várja
+    const apiVersion = "v1beta"; 
+    const apiUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${selectedModel}:generateContent?key=${apiKey}`;
 
-                const originalResponse = await originalRes.json();
-                aiResponseDiv.innerText = originalResponse.choices[0].message.content;
+    const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            contents: [{
+                parts: [{ text: userPrompt }]
+            }]
+        })
+    });
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`Gemini API Hiba (${response.status}): ${errData.error?.message || 'Ismeretlen hiba.'}`);
+    }
+
+    const resData = await response.json();
+    // A Gemini natív JSON struktúrájából így nyerjük ki a szöveget:
+    originalResponseText = resData.candidates[0].content.parts[0].text;
+
+} else {
+    // --- GROQ / LLAMA STANDARD HÍVÁS ---
+    const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+
+    const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: selectedModel,
+            messages: [{ role: "user", content: userPrompt }]
+        })
+    });
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`API Hiba (${response.status}): ${errData.error?.message || 'Ismeretlen hiba.'}`);
+    }
+
+    const resData = await response.json();
+    // A Groq/OpenAI struktúrából így nyerjük ki a szöveget (javított indexeléssel):
+    originalResponseText = resData.choices[0].message.content;
+}
+
+// 2. LÉPÉS: Az eredmény kiíratása a felületre
+aiResponseDiv.innerText = originalResponseText;
 
                 // 2. LÉPÉS: Megkérjük az AI-t, hogy értékelje ki a promptot strukturált JSON-ban
                 const evaluationSystemPrompt = `Egy AI prompt szakértő vagy. Értékeld a felhasználó promptját a következő 4 szempont alapján 0 és 100 pont között:
@@ -150,35 +200,79 @@
                     "feedback": "Ide írd le magyarul, hogyan tudná fejleszteni a promptját, mi hiányzik belőle."
                 }`;
 
-                const evalRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        response_format: { type: "json_object" },
-                        messages: [
-                            { role: "system", content: evaluationSystemPrompt },
-                            { role: "user", content: `Íme a prompt amit értékelned kell: "${userPrompt}"` }
-                        ]
-                    })
-                });
+                let evalResponseText = "";
 
-                if (!evalRes.ok) {
-                    throw new Error(`Értékelési API Hiba (${evalRes.status})`);
+                if (selectedModel.includes("gemini")) {
+                    // --- GEMINI ÉRTÉKELÉS (JSON ÚRLAPBAN) ---
+                                        // 1. JAVÍTÁS: A helyes, CORS-barát Google AI domain használata a megfelelő URL paraméterezéssel
+                                    
+                                        const apiVersion = "v1beta"; 
+                                        const evalUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${selectedModel}:generateContent?key=${apiKey}`;
+                                    
+                                        const evalRes = await fetch(evalUrl, {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({
+                                                contents: [
+                                                    {
+                                                        role: "user",
+                                                        parts: [{ text: `Rendszer üzenet / Elvárások:\n${evaluationSystemPrompt}\n\nÍme a prompt amit értékelned kell: "${userPrompt}"` }]
+                                                    }
+                                                ], // 2. JAVÍTÁS: Eltávolítva a magányos, hibás vessző (,,)
+                                                generationConfig: {
+                                                    responseMimeType: "application/json"
+                                                }
+                                            }) // 3. JAVÍTÁS: A JSON.stringify zárójele (}) és a fetch zárójele )) megfelelően lezárva
+                                        });
+                    
+
+                    if (!evalRes.ok) {
+                        const errData = await evalRes.json().catch(() => ({}));
+                        throw new Error(`Gemini Értékelési Hiba (${evalRes.status}): ${errData.error?.message || 'Sikertelen értékelés.'}`);
+                    }
+
+                    const evalData = await evalRes.json();
+                    evalResponseText = evalData.candidates[0].content.parts[0].text;
+
+                } else {
+                    // --- GROQ / LLAMA ÉRTÉKELÉS (Eredeti logika) ---
+                    const evalRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${apiKey}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            response_format: { type: "json_object" },
+                            messages: [
+                                { role: "system", content: evaluationSystemPrompt },
+                                { role: "user", content: `Íme a prompt amit értékelned kell: "${userPrompt}"` }
+                            ]
+                        })
+                    });
+
+                    if (!evalRes.ok) {
+                        const errData = await evalRes.json().catch(() => ({}));
+                        throw new Error(`Groq Értékelési Hiba (${evalRes.status}): ${errData.error?.message || 'Sikertelen értékelés.'}`);
+                    }
+
+                    const evalData = await evalRes.json();
+                    evalResponseText = evalData.choices[0].message.content;
                 }
 
-                const evaluationResponse = await evalRes.json();
-                const result = JSON.parse(evaluationResponse.choices[0].message.content);
+                // Ezután a meglévő kódodváltozója már használhatja az 'evalResponseText' stringet a JSON.parse()-hoz:
+                const result = JSON.parse(evalResponseText);
+                //const result = JSON.parse(evaluationResponse.choices[0].message.content);
                 
                 // Felület frissítése
                 updateUI(result);
 
             } catch (error) {
                 console.error(error);
-                aiResponseDiv.innerText = `Hiba történt:\n${error.message}\n\nTipp: Ellenőrizd, hogy a Groq API kulcsod helyes-e, aktív-e, és nincs-e benne felesleges szóköz!`;
+                aiResponseDiv.innerText = `Hiba történt:\n${error.message}\n\nTipp: Ellenőrizd, hogy az API kulcsod helyes-e, aktív-e, és nincs-e benne felesleges szóköz!`;
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Tesztelés és Értékelés";
