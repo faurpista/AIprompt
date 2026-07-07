@@ -23,7 +23,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">API Kulcs:</label>
-                    <input type="password" id="apiKey" placeholder="..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
+                    <input type="password" id="apiKey" placeholder="GROQ API KEY..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Válassz modellt:</label>
@@ -131,7 +131,6 @@ let originalResponseText = ""; // Ebben tároljuk majd a kapott szöveget
 if (selectedModel.includes("gemini")) {
     // --- GEMINI NATÍV BÖNGÉSZŐS HÍVÁS (CORS-barát, nem kell proxy) ---
     // Az API kulcsot a Google biztonságosan, URL paraméterként várja
-    document.getElementById('apiKey').placeolder = "GEMINI API KEY";
     const apiVersion = "v1beta"; 
     const apiUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${selectedModel}:generateContent?key=${apiKey}`;
 
@@ -158,7 +157,6 @@ if (selectedModel.includes("gemini")) {
 
 } else {
     // --- GROQ / LLAMA STANDARD HÍVÁS ---
-    document.getElementById('apiKey').placeolder = "GROQ API KEY";
     const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
 
     const response = await fetch(apiUrl, {
@@ -314,6 +312,17 @@ aiResponseDiv.innerText = originalResponseText;
 
             document.getElementById('feedbackText').innerText = data.feedback;
         }
+
+        document.querySelector('#modelSelect').addEventListener('change', (e) => {
+            const selectedModel = document.getElementById("modelSelect").value;
+            if (selectedModel.includes("gemini")) {
+                // --- GEMINI NATÍV BÖNGÉSZŐS HÍVÁS (CORS-barát, nem kell proxy) ---
+                // Az API kulcsot a Google biztonságosan, URL paraméterként várja
+                document.getElementById('apiKey').placeholder = "GEMINI API KEY...";
+            }else{
+                document.getElementById('apiKey').placeholder = "GROQ API KEY...";
+            }
+        });        
     </script>
 </body>
 </html>
