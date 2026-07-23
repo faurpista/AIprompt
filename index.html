@@ -296,6 +296,490 @@
 
             const t = translations[lang];
 
+            // Szövegek frissítése
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.innerText = t[key];
+            });
+
+            // Placeholderek frissítése
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (t[key]) el.placeholder = t[key];
+            });
+
+            document.getElementById('docTitle').innerText = t.docTitle;
+            updateApiKeyPlaceholder();
+        }
+
+        function updateApiKeyPlaceholder() {
+            const selectedModel = document.getElementById("modelSelect").value;
+            const apiKeyInput = document.getElementById('apiKey');
+            if (selectedModel.includes("gemini")) {
+                apiKeyInput.placeholder = "GEMINI API KEY...";
+            } else {
+                apiKeyInput.placeholder = "GROQ API KEY...";
+            }
+        }
+
+        document.getElementById('langSelect').addEventListener('change', (e) => changeLanguage(e.target.value));
+        document.querySelector('#modelSelect').addEventListener('change', updateApiKeyPlaceholder);
+        
+        // Oldal betöltésekor azonnal alkalmazza a mentett nyelvet
+        changeLanguage(currentLang);
+
+        async function analyzePrompt() {
+            const t = translations[currentLang];
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const userPrompt = document.getElementById('userPrompt').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const aiResponseDiv = document.getElementById('aiResponse');
+
+            // Dinamikus nyelvi ellenőrzés alert üzenettel
+            if (!apiKey) {
+                alert(t.errApiKey);
+                return;
+            }
+            if (!userPrompt) {
+                alert(t.errPrompt);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = t.analyzingBtn;
+            aiResponseDiv.innerText = t.thinkingMsg;
+
+            try {
+                const selectedModel = document.getElementById("modelSelect").value;
+                let originalResponseText = "";
+
+                if (selectedModel.includes("gemini")) {
+                    const apiVersion = "v1beta"; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: userPrompt }] }]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(`Gemini API Error (${response.status}): ${errData.error?.message || 'Unknown error.'}`);
+                    }
+
+                    const resData = await response.json();
+                    originalResponseText = resData.candidates[0].content.parts[0].text;
+
+                } else {
+                    const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${apiKey}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: selectedModel,
+                            messages: [{ role: "user", content: userPrompt }]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(`API Error (${response.status}): ${errData.error?.message || 'Unknown error.'}`);
+                    }
+
+                    const resData = await response.json();
+                    originalResponseText = resData.choices[0].message.content;
+                }
+
+                aiResponseDiv.innerText = originalResponseText;
+
+                // Szigorúan a választott nyelvre kikötött System Prompt
+                const evaluationSystemPrompt = `You are an AI prompt expert. Evaluate the user's prompt based on the following 4 criteria, scoring each from 0 to 100:
+1. Role (Did they specify a precise role for the AI?)
+2. Context (Did they explain the background/context?)
+3. Task (Is the goal/task clear?)
+4. Constraints (Are there limitations like length, tone, structure?)
+
+Return ONLY a valid JSON object without markdown formatting. Write the "feedback" string STRICTLY in ${t.langName} language!
+JSON structure:
+{
+    "role_score": 80,
+    "context_score": 50,
+    "task_score": 90,
+    "constraints_score": 30,
+    "feedback": "Detailed constructive advice in ${t.langName} on how to improve the prompt."
+}`;
+
+                let evalResponseText = "";
+
+                if (selectedModel.includes("gemini")) {
+                    const apiVersion = "v1beta"; 
+                    const evalUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${selectedModel}:generateContent?key=${apiKey}`;
+                
+                    const evalRes = await fetch(evalUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{
+                                role: "user",
+                                parts: [{ text: `${evaluationSystemPrompt}\n\nUser Prompt to evaluate: "${userPrompt}"` }]
+                            }],
+                            generationConfig: { responseMimeType: "application/json" }
+                        })
+                    });
+
+                    if (!evalRes.ok) {
+                        const errData = await evalRes.json().catch(() => ({}));
+                        throw new Error(`Gemini Eval Error (${evalRes.status}): ${errData.error?.message || 'Failed evaluation.'}`);
+                    }
+
+                    const evalData = await evalRes.json();
+                    evalResponseText = evalData.candidates[0].content.parts[0].text;
+
+                } else {
+                    const evalRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${apiKey}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            response_format: { type: "json_object" },
+                            messages: [
+                                { role: "system", content: evaluationSystemPrompt },
+                                { role: "user", content: `Prompt to evaluate: "${userPrompt}"` }
+                            ]
+                        })
+                    });
+
+                    if (!evalRes.ok) {
+                        const errData = await evalRes.json().catch(() => ({}));
+                        throw new Error(`Groq Eval Error (${evalRes.status}): ${errData.error?.message || 'Failed evaluation.'}`);
+                    }
+
+                    const evalData = await evalRes.json();
+                    evalResponseText = evalData.choices[0].message.content;
+                }
+
+                const result = JSON.parse(evalResponseText);
+                updateUI(result);
+
+            } catch (error) {
+                console.error(error);
+                aiResponseDiv.innerText = `Error:\n${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = t.submitBtn;
+            }
+        }
+
+        function updateUI(data) {
+            const t = translations[currentLang];
+
+            document.getElementById('p-role').innerText = data.role_score + '%';
+            document.getElementById('b-role').style.width = data.role_score + '%';
+
+            document.getElementById('p-context').innerText = data.context_score + '%';
+            document.getElementById('b-context').style.width = data.context_score + '%';
+
+            document.getElementById('p-task').innerText = data.task_score + '%';
+            document.getElementById('b-task').style.width = data.task_score + '%';
+
+            document.getElementById('p-constraints').innerText = data.constraints_score + '%';
+            document.getElementById('b-constraints').style.width = data.constraints_score + '%';
+
+            const totalAverage = Math.round((data.role_score + data.context_score + data.task_score + data.constraints_score) / 4);
+            document.getElementById('scoreText').innerText = totalAverage + '%';
+
+            const circle = document.getElementById('scoreCircle');
+            if (totalAverage >= 80) {
+                circle.className = "relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-emerald-500";
+                document.getElementById('ratingLabel').innerText = t.ratingGreat;
+                document.getElementById('ratingDesc').innerText = t.descGreat;
+            } else if (totalAverage >= 50) {
+                circle.className = "relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-yellow-500";
+                document.getElementById('ratingLabel').innerText = t.ratingMedium;
+                document.getElementById('ratingDesc').innerText = t.descMedium;
+            } else {
+                circle.className = "relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-red-500";
+                document.getElementById('ratingLabel').innerText = t.ratingPoor;
+                document.getElementById('ratingDesc').innerText = t.descPoor;
+            }
+
+            document.getElementById('feedbackText').innerText = data.feedback;
+        }
+    </script>
+</body>
+</html>
+                    <input type="password" id="apiKey" placeholder="GROQ API KEY..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label data-i18n="modelLabel" class="block text-sm font-medium text-gray-400 mb-1"></label>
+                    <select id="modelSelect" class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        <option value="meta-llama/llama-4-scout-17b-16e-instruct">meta-llama/llama-4-scout-17b-16e-instruct</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                    </select>
+                </div>
+            </div>
+            <p data-i18n="apiNote" class="text-xs text-gray-500 mt-1"></p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Bal oldal: Prompt írás -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
+                <div>
+                    <h2 data-i18n="promptBoxTitle" class="text-xl font-bold mb-4 text-cyan-400"></h2>
+                    <p data-i18n="promptBoxTip" class="text-xs text-gray-400 mb-2"></p>
+                    <textarea id="userPrompt" rows="8" data-i18n-ph="promptPlaceholder" class="w-full p-3 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 mb-4 resize-none"></textarea>
+                </div>
+                <button onclick="analyzePrompt()" id="submitBtn" data-i18n="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md transition duration-200 cursor-pointer">
+                </button>
+            </div>
+
+            <!-- Jobb oldal: Értékelés és Eredmény -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                <h2 data-i18n="evalTitle" class="text-xl font-bold mb-4 text-cyan-400"></h2>
+                
+                <!-- Százalékos mutató -->
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-gray-600" id="scoreCircle">
+                        <span class="text-2xl font-black text-white" id="scoreText">0%</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg" id="ratingLabel" data-i18n="waitingLabel"></h3>
+                        <p class="text-sm text-gray-400" id="ratingDesc" data-i18n="waitingDesc"></p>
+                    </div>
+                </div>
+
+                <!-- Részletes pontszámok -->
+                <div class="space-y-3 mb-6">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span data-i18n="lblRole"></span><span id="p-role">0%</span></div>
+                        <div class="w-full bg-gray-700 h-2 rounded"><div id="b-role" class="bg-cyan-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span data-i18n="lblContext"></span><span id="p-context">0%</span></div>
+                        <div class="w-full bg-gray-700 h-2 rounded"><div id="b-context" class="bg-blue-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span data-i18n="lblTask"></span><span id="p-task">0%</span></div>
+                        <div class="w-full bg-gray-700 h-2 rounded"><div id="b-task" class="bg-purple-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span data-i18n="lblConstraints"></span><span id="p-constraints">0%</span></div>
+                        <div class="w-full bg-gray-700 h-2 rounded"><div id="b-constraints" class="bg-pink-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                    </div>
+                </div>
+
+                <!-- Konstruktív kritika -->
+                <div class="bg-gray-950 p-4 rounded-lg border border-gray-700 max-h-48 overflow-y-auto">
+                    <h4 data-i18n="feedbackTitle" class="text-xs font-bold uppercase text-gray-400 mb-1"></h4>
+                    <p id="feedbackText" data-i18n="feedbackDefault" class="text-sm text-gray-300 italic"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Eredeti Válasza Szekció -->
+        <div class="mt-6 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+            <h2 data-i18n="aiRespTitle" class="text-lg font-bold mb-2 text-emerald-400"></h2>
+            <div id="aiResponse" data-i18n="aiRespDefault" class="bg-gray-900 p-4 rounded-lg text-sm text-gray-300 min-h-16 whitespace-pre-line border border-gray-700">
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logika & Szótár -->
+    <script>
+        const translations = {
+            hu: {
+                docTitle: "AI Prompt Akadémia",
+                mainTitle: "Prompt Mérnök Képző",
+                mainSubtitle: "Tanuld meg a tökéletes prompt felépítését (Role, Context, Task, Constraints)",
+                apiKeyLabel: "API Kulcs:",
+                modelLabel: "Válassz modellt:",
+                apiNote: "A kulcsod közvetlenül a kiválasztott API-hoz beszél, nem mentődvén el sehova.",
+                promptBoxTitle: "Írd ide a promptodat",
+                promptBoxTip: "Tipp: Tartalmazzon Szerepkört (Role), Környezetet (Context), Feladatot (Task) és Korlátozásokat (Constraints).",
+                promptPlaceholder: "Pl.: Úgy viselkedj, mint egy tapasztalt marketinges (Role). Egy induló kávézónak készítünk szlogent (Context). Írj 3 frappáns szlogent (Task). A szlogenek ne legyenek hosszabbak 5 szónál (Constraints).",
+                submitBtn: "Tesztelés és Értékelés",
+                evalTitle: "AI Kiértékelés",
+                waitingLabel: "Várakozás a promptra...",
+                waitingDesc: "Kattints a gombra az elemzéshez.",
+                lblRole: "Szerepkör (Role)",
+                lblContext: "Kontextus (Context)",
+                lblTask: "Feladat tisztasága (Task)",
+                lblConstraints: "Korlátozások (Constraints)",
+                feedbackTitle: "Javaslat a javításra:",
+                feedbackDefault: "Itt fog megjelenni az AI részletes tanácsa, hogy hogyan tehetnéd még jobbá a promptot.",
+                aiRespTitle: "Hogyan válaszolna erre az AI?",
+                aiRespDefault: "A promptodra adott tényleges AI válasz itt fog megjelenni...",
+                errApiKey: "Kérlek, add meg a megfelelő API kulcsodat!",
+                errPrompt: "Írj be egy promptot a teszteléshez!",
+                analyzingBtn: "Elemzés folyamatban...",
+                thinkingMsg: "Gondolkodom...",
+                ratingGreat: "Kiváló Prompt!",
+                descGreat: "Mesterien strukturáltad a parancsot.",
+                ratingMedium: "Alakul, de lehet jobb",
+                descMedium: "Pár fontos részlet még hiányzik.",
+                ratingPoor: "Gyenge prompt",
+                descPoor: "Túl kevés információt adtál az AI-nak.",
+                langName: "Hungarian"
+            },
+            en: {
+                docTitle: "AI Prompt Academy",
+                mainTitle: "Prompt Engineer Trainer",
+                mainSubtitle: "Learn to build the perfect prompt (Role, Context, Task, Constraints)",
+                apiKeyLabel: "API Key:",
+                modelLabel: "Select Model:",
+                apiNote: "Your key connects directly to the API and is never saved anywhere.",
+                promptBoxTitle: "Type your prompt here",
+                promptBoxTip: "Tip: Include Role, Context, Task, and Constraints.",
+                promptPlaceholder: "E.g., Act as an experienced marketer (Role). We are creating a slogan for a new cafe (Context). Write 3 catchy slogans (Task). Max 5 words each (Constraints).",
+                submitBtn: "Test and Evaluate",
+                evalTitle: "AI Evaluation",
+                waitingLabel: "Waiting for prompt...",
+                waitingDesc: "Click the button to start analysis.",
+                lblRole: "Role",
+                lblContext: "Context",
+                lblTask: "Task Clarity",
+                lblConstraints: "Constraints",
+                feedbackTitle: "Improvement Advice:",
+                feedbackDefault: "Detailed AI suggestions will appear here to help improve your prompt.",
+                aiRespTitle: "How would the AI respond?",
+                aiRespDefault: "The actual AI output for your prompt will appear here...",
+                errApiKey: "Please provide your API key!",
+                errPrompt: "Please enter a prompt to test!",
+                analyzingBtn: "Analyzing...",
+                thinkingMsg: "Thinking...",
+                ratingGreat: "Excellent Prompt!",
+                descGreat: "Masterfully structured prompt.",
+                ratingMedium: "Getting there, but can improve",
+                descMedium: "A few important details are missing.",
+                ratingPoor: "Weak Prompt",
+                descPoor: "Not enough information given to the AI.",
+                langName: "English"
+            },
+            de: {
+                docTitle: "AI Prompt Akademie",
+                mainTitle: "Prompt Engineering Trainer",
+                mainSubtitle: "Lerne den perfekten Prompt zu erstellen (Rolle, Kontext, Aufgabe, Einschränkungen)",
+                apiKeyLabel: "API-Schlüssel:",
+                modelLabel: "Modell wählen:",
+                apiNote: "Ihr Schlüssel wird direkt an die API gesendet und nirgendwo gespeichert.",
+                promptBoxTitle: "Geben Sie Ihren Prompt ein",
+                promptBoxTip: "Tipp: Enthalten sein sollten Rolle, Kontext, Aufgabe und Einschränkungen.",
+                promptPlaceholder: "Z.B.: Agiere als erfahrener Marketer (Rolle). Wir erstellen einen Slogan für ein neues Café (Kontext). Schreibe 3 eingängige Slogans (Aufgabe). Max. 5 Wörter pro Slogan (Einschränkungen).",
+                submitBtn: "Testen und Bewerten",
+                evalTitle: "AI Auswertung",
+                waitingLabel: "Warten auf Prompt...",
+                waitingDesc: "Klicken Sie auf den Button, um die Analyse zu starten.",
+                lblRole: "Rolle (Role)",
+                lblContext: "Kontext (Context)",
+                lblTask: "Aufgabenklarheit (Task)",
+                lblConstraints: "Einschränkungen (Constraints)",
+                feedbackTitle: "Verbesserungsvorschlag:",
+                feedbackDefault: "Hier erscheint das detaillierte Feedback der KI zur Verbesserung Ihres Prompts.",
+                aiRespTitle: "Wie würde die KI antworten?",
+                aiRespDefault: "Die tatsächliche KI-Antwort auf Ihren Prompt erscheint hier...",
+                errApiKey: "Bitte geben Sie Ihren API-Schlüssel ein!",
+                errPrompt: "Bitte geben Sie einen Prompt zum Testen ein!",
+                analyzingBtn: "Analyse läuft...",
+                thinkingMsg: "Denke nach...",
+                ratingGreat: "Hervorragender Prompt!",
+                descGreat: "Meisterhaft strukturierter Befehl.",
+                ratingMedium: "Guter Ansatz, aber verbesserungswürdig",
+                descMedium: "Es fehlen noch einige wichtige Details.",
+                ratingPoor: "Schwacher Prompt",
+                descPoor: "Zu wenige Informationen für die KI.",
+                langName: "German"
+            },
+            fr: {
+                docTitle: "Académie de Prompt AI",
+                mainTitle: "Formateur d'Ingénieur de Prompt",
+                mainSubtitle: "Apprenez à structurer le prompt parfait (Rôle, Contexte, Tâche, Contraintes)",
+                apiKeyLabel: "Clé API :",
+                modelLabel: "Choisir un modèle :",
+                apiNote: "Votre clé communique directement avec l'API et n'est stockée nulle part.",
+                promptBoxTitle: "Écrivez votre prompt ici",
+                promptBoxTip: "Conseil : Incluez un Rôle, le Contexte, la Tâche et des Contraintes.",
+                promptPlaceholder: "Ex: Agis comme un spécialiste du marketing (Rôle). Nous créons un slogan pour un nouveau café (Contexte). Écris 3 slogans percutants (Tâche). Maximum 5 mots par slogan (Contraintes).",
+                submitBtn: "Tester et Évaluer",
+                evalTitle: "Évaluation AI",
+                waitingLabel: "En attente du prompt...",
+                waitingDesc: "Cliquez sur le bouton pour lancer l'analyse.",
+                lblRole: "Rôle (Role)",
+                lblContext: "Contexte (Context)",
+                lblTask: "Clarté de la tâche (Task)",
+                lblConstraints: "Contraintes (Constraints)",
+                feedbackTitle: "Conseils d'amélioration :",
+                feedbackDefault: "Les conseils détaillés de l'IA apparaîtront ici pour vous aider à améliorer votre prompt.",
+                aiRespTitle: "Comment l'IA répondrait-elle ?",
+                aiRespDefault: "La réponse réelle de l'IA à votre prompt apparaîtra ici...",
+                errApiKey: "Veuillez saisir votre clé API !",
+                errPrompt: "Veuillez saisir un prompt à tester !",
+                analyzingBtn: "Analyse en cours...",
+                thinkingMsg: "Réflexion en cours...",
+                ratingGreat: "Excellent Prompt !",
+                descGreat: "Commande parfaitement structurée.",
+                ratingMedium: "En bonne voie, mais améliorable",
+                descMedium: "Il manque quelques détails importants.",
+                ratingPoor: "Prompt faible",
+                descPoor: "Pas assez d'informations fournies à l'IA.",
+                langName: "French"
+            },
+            pl: {
+                docTitle: "Akademia Promptowania AI",
+                mainTitle: "Trener Prompt Engineeringu",
+                mainSubtitle: "Nauczy się budować idealny prompt (Rola, Kontekst, Zadanie, Ograniczenia)",
+                apiKeyLabel: "Klucz API:",
+                modelLabel: "Wybierz model:",
+                apiNote: "Twój klucz łączy się bezpośrednio z API i nie jest nigdzie zapisywany.",
+                promptBoxTitle: "Wpisz swój prompt tutaj",
+                promptBoxTip: "Wskazówka: Uwzględnij Rolę, Kontekst, Zadanie i Ograniczenia.",
+                promptPlaceholder: "Np.: Działaj jako doświadczony marketer (Rola). Tworzymy hasło dla nowej kawiarni (Kontekst). Napisz 3 chwytliwe hasła (Zadanie). Maksymalnie 5 słów każde (Ograniczenia).",
+                submitBtn: "Testuj i Oceń",
+                evalTitle: "Ocena AI",
+                waitingLabel: "Oczekiwanie na prompt...",
+                waitingDesc: "Kliknij przycisk, aby rozpocząć analizę.",
+                lblRole: "Rola (Role)",
+                lblContext: "Kontekst (Context)",
+                lblTask: "Jasność zadania (Task)",
+                lblConstraints: "Ograniczenia (Constraints)",
+                feedbackTitle: "Wskazówki dotyczące poprawy:",
+                feedbackDefault: "Tutaj pojawią się szczegółowe porady AI, jak ulepszyć Twój prompt.",
+                aiRespTitle: "Jak odpowiedziałoby AI?",
+                aiRespDefault: "Rzeczywista odpowiedź AI na Twój prompt pojawi się tutaj...",
+                errApiKey: "Proszę podać swój klucz API!",
+                errPrompt: "Proszę wpisać prompt do testu!",
+                analyzingBtn: "Analizowanie...",
+                thinkingMsg: "Myślę...",
+                ratingGreat: "Doskonały Prompt!",
+                descGreat: "Mistrzowsko ustrukturyzowane polecenie.",
+                ratingMedium: "Coraz lepiej, ale można poprawić",
+                descMedium: "Brakuje kilku ważnych szczegółów.",
+                ratingPoor: "Słaby prompt",
+                descPoor: "Za mało informacji przekazanych dla AI.",
+                langName: "Polish"
+            }
+        };
+
+        let currentLang = localStorage.getItem('preferredLang') || 'hu';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferredLang', lang);
+            document.getElementById('langSelect').value = lang;
+            document.documentElement.lang = lang;
+
+            const t = translations[lang];
+
             // Szövegek cseréje
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
