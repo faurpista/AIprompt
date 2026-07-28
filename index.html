@@ -597,60 +597,61 @@ document.addEventListener('contextmenu', e => {
 
     // 1. ZENEGENERÁLÓ LOGIKA (ÚJ)
     async function generateAudioModel(selectedModel) {
-        const t = translations[currentLang] || translations.hu;
-        const apiKey = document.getElementById('apiKey').value.trim();
-        const userPrompt = document.getElementById('userPrompt').value.trim();
-        const submitBtn = document.getElementById('submitBtn');
-        const audioPlaceholder = document.getElementById('audioPlaceholder');
-        const audioContainer = document.getElementById('audioContainer');
-        const audioElement = document.getElementById('generatedAudio');
-        const downloadBtn = document.getElementById('downloadAudioBtn');
+    const t = translations[currentLang] || translations.hu;
+    const userPrompt = document.getElementById('userPrompt').value.trim();
+    const submitBtn = document.getElementById('submitBtn');
+    const audioPlaceholder = document.getElementById('audioPlaceholder');
+    const audioContainer = document.getElementById('audioContainer');
+    const audioElement = document.getElementById('generatedAudio');
+    const downloadBtn = document.getElementById('downloadAudioBtn');
 
-        if (!userPrompt) { alert(t.errPrompt); return; }
-        if (!apiKey) { alert(t.errApiKey); return; }
+    // Csak a promptot ellenőrizzük, az API kulcsot MÁR NEM!
+    if (!userPrompt) { alert(t.errPrompt); return; }
 
-        submitBtn.disabled = true;
-        submitBtn.innerText = t.generatingAudioBtn || "🎵 Zene komponálása...";
-        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása folyamatban (ez elvehet 20-40 másodpercet)...</span>`;
-        audioPlaceholder.classList.remove('hidden');
-        audioContainer.classList.add('hidden');
-        downloadBtn.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.innerText = t.generatingAudioBtn || "🎵 Zene komponálása...";
+    audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása folyamatban...</span>`;
+    audioPlaceholder.classList.remove('hidden');
+    audioContainer.classList.add('hidden');
+    downloadBtn.classList.add('hidden');
 
-        try {
-            const response = await fetch(`https://api-inference.huggingface.co/models/${selectedModel}`, {
-                headers: {
-                    "Authorization": `Bearer ${apiKey}`,
-                    "Content-Type": "application/json"
-                },
-                method: "POST",
-                body: JSON.stringify({ inputs: userPrompt })
-            });
+    try {
+        // Pollinations Audio API – Ingyenes, kulcsmentes generálás
+        const encodedPrompt = encodeURIComponent(userPrompt);
+        const audioUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio`;
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(`Hugging Face Audio Error (${response.status}): ${errData.error || 'Nem sikerült legenerálni a zenét.'}`);
-            }
+        // Kérés a hangfájl letöltésére (Blobként)
+        const response = await fetch(audioUrl);
 
-            const blob = await response.blob();
-            const audioUrl = URL.createObjectURL(blob);
-
-            audioElement.src = audioUrl;
-            audioPlaceholder.classList.add('hidden');
-            audioContainer.classList.remove('hidden');
-            
-            downloadBtn.href = audioUrl;
-            downloadBtn.classList.remove('hidden');
-            audioElement.play().catch(e => console.log("Auto-play letiltva a böngésző által."));
-
-        } catch (error) {
-            console.error(error);
-            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">Hiba: ${error.message}</span>`;
-            audioPlaceholder.classList.remove('hidden');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerText = t.submitBtnAudio || "🎵 Zene Generálása";
+        if (!response.ok) {
+            throw new Error(`Szerver hiba (${response.status}): Nem sikerült legenerálni a zenét.`);
         }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        // Beállítjuk a lejátszót és a letöltő gombot
+        audioElement.src = objectUrl;
+        audioPlaceholder.classList.add('hidden');
+        audioContainer.classList.remove('hidden');
+        
+        downloadBtn.href = objectUrl;
+        downloadBtn.download = "generalt-zene.mp3";
+        downloadBtn.classList.remove('hidden');
+
+        // Automatikus lejátszás megkísérlése
+        audioElement.play().catch(e => console.log("Auto-play letiltva a böngésző által."));
+
+    } catch (error) {
+        console.error(error);
+        audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">Hiba: ${error.message}</span>`;
+        audioPlaceholder.classList.remove('hidden');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = t.submitBtnAudio || "🎵 Zene Generálása";
     }
+}
+
 
     // 2. KÉPGENERÁLÓ LOGIKA
     async function generateImageModel(modelType) {
