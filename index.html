@@ -197,6 +197,10 @@ body {
                             <option value="pollinations-image">Pollinations.ai (Ingyenes / Free)</option>
                             <option value="hf-flux-image">FLUX.1-dev (Hugging Face API Key)</option>
                         </optgroup>
+                        <optgroup label="">
+                            <option value="black-forest-labs/FLUX.1-schnell">🎨 FLUX.1 Schnell (Kép)</option>
+                            <option value="facebook/musicgen-small">🎵 Meta MusicGen (Zene)</option>
+                        </optgroup>
                     </select>
                 </div>
             </div>
@@ -276,7 +280,31 @@ body {
                 </div>
             </div>
         </div>
-
+<!-- 3. ÚJ: Zenegeneráló szekció (A képes blokk alá kerül) -->
+                <div id="audioEvalSection" class="hidden flex flex-col justify-between h-full">
+                    <div>
+                        <h2 class="text-xl font-bold mb-4 text-purple-400">🎵 Generált Zene</h2>
+                        <div class="bg-gray-950 p-6 rounded-xl border border-gray-700 min-h-[280px] flex flex-col items-center justify-center relative">
+                            <div id="audioPlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-5xl block mb-3">🎧</span>
+                                <span class="text-sm">Írj le egy zenei stílust angolul (pl. <i>chill synthwave, acoustic guitar</i>), majd kattints a generálásra!</span>
+                            </div>
+                            
+                            <!-- A lejátszó blokk, ami a generálás után láthatóvá válik -->
+                            <div id="audioContainer" class="hidden w-full flex flex-col items-center space-y-4">
+                                <div class="w-20 h-20 rounded-full bg-purple-900/50 border-2 border-purple-500 flex items-center justify-center animate-pulse">
+                                    <span class="text-3xl">🎶</span>
+                                </div>
+                                <audio id="generatedAudio" controls class="w-full mt-4 rounded-lg"></audio>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a id="downloadAudioBtn" href="#" download="generated-music.wav" class="hidden w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-center shadow-md transition duration-200">
+                            📥 Zene Letöltése (.wav)
+                        </a>
+                    </div>
+    </div>
         <!-- AI Eredeti Válasza Szekció (Szöveges modelleknél) -->
         <div id="aiResponseContainer" class="mt-6 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
             <h2 data-i18n="aiRespTitle" class="text-lg font-bold mb-2 text-emerald-400"></h2>
@@ -347,7 +375,10 @@ body {
             readmeTitle: "Útmutató & API Beállítások",
             generatedImgTitle: "Generált Kép",
             imagePlaceholderText: "Írj egy leírást (lehetőleg angolul), majd kattints a generálás gombra!",
-            downloadBtnText: "Kép Letöltése"
+            downloadBtnText: "Kép Letöltése",
+            submitBtnAudio: "🎵 Zene Generálása",
+            promptBoxTipAudio: "Tipp: Írj le zenei stílust, mood-ot és hangszereket angolul a legjobb eredményért!",
+            promptPlaceholderAudio: "Pl.: 80s synthwave beat, fast tempo, retro gaming music..."
         },
         en: {
             docTitle: "AI Prompt Academy",
@@ -393,7 +424,10 @@ body {
             readmeTitle: "Guide & API Setup",
             generatedImgTitle: "Generated Image",
             imagePlaceholderText: "Write a detailed description and click Generate Image!",
-            downloadBtnText: "Download Image"
+            downloadBtnText: "Download Image",
+            submitBtnAudio: "🎵 Generate Music",
+            promptBoxTipAudio: "Tip: Describe genre, mood, and instruments in English for best results!",
+            promptPlaceholderAudio: "e.g., 80s synthwave beat, fast tempo, retro gaming music..."
         },
         de: {
             docTitle: "AI Prompt Akademie",
@@ -569,52 +603,76 @@ body {
         updateUIForSelectedModel();
     }
 
-    function updateUIForSelectedModel() {
-        const t = translations[currentLang] || translations.hu;
-        const selectedModel = document.getElementById("modelSelect").value;
-        const apiKeyInput = document.getElementById('apiKey');
-        const submitBtn = document.getElementById('submitBtn');
-        const apiNoteText = document.getElementById('apiNoteText');
-        const promptTipText = document.getElementById('promptTipText');
-        const promptInput = document.getElementById('userPrompt');
+    // Segédfüggvények a modellek beazonosítására (a kódod elejére vagy a függvény fölé)
+const isImageModel = (model) => model === 'pollinations-image' || model === 'hf-flux-image';
+const isAudioModel = (model) => model === 'facebook/musicgen-small';
 
-        const textSection = document.getElementById('textEvalSection');
-        const imageSection = document.getElementById('imageEvalSection');
-        const aiResponseContainer = document.getElementById('aiResponseContainer');
+function updateUIForSelectedModel() {
+    const t = translations[currentLang] || translations.hu;
+    const selectedModel = document.getElementById("modelSelect").value;
+    const apiKeyInput = document.getElementById('apiKey');
+    const submitBtn = document.getElementById('submitBtn');
+    const apiNoteText = document.getElementById('apiNoteText');
+    const promptTipText = document.getElementById('promptTipText');
+    const promptInput = document.getElementById('userPrompt');
 
-        if (isImageModel(selectedModel)) {
-            textSection.classList.add('hidden');
-            aiResponseContainer.classList.add('hidden');
-            imageSection.classList.remove('hidden');
+    const textSection = document.getElementById('textEvalSection');
+    const imageSection = document.getElementById('imageEvalSection');
+    const audioSection = document.getElementById('audioEvalSection'); // ÚJ
+    const aiResponseContainer = document.getElementById('aiResponseContainer');
 
-            submitBtn.innerText = t.submitBtnImg;
-            promptTipText.innerText = t.promptBoxTipImg;
-            promptInput.placeholder = t.promptPlaceholderImg;
+    if (isAudioModel(selectedModel)) {
+        // 🎵 ZENE MODELL ESETÉN
+        textSection.classList.add('hidden');
+        aiResponseContainer.classList.add('hidden');
+        imageSection.classList.add('hidden');
+        audioSection.classList.remove('hidden');
 
-            if (selectedModel === 'pollinations-image') {
-                apiKeyInput.placeholder = "Nem szükséges API kulcs (Optional)";
-                apiNoteText.innerText = t.apiNoteFree;
-            } else {
-                apiKeyInput.placeholder = "Hugging Face API Token (hf_...)";
-                apiNoteText.innerText = t.apiNote;
-            }
+        submitBtn.innerText = t.submitBtnAudio || "🎵 Zene Generálása";
+        promptTipText.innerText = t.promptBoxTipAudio || "Tipp: Írj műfajt, hangszereket, tempót angolul (pl. chill synthwave, acoustic guitar)!";
+        promptInput.placeholder = t.promptPlaceholderAudio || "Pl.: Lo-fi hip hop beat with calm piano and acoustic bass...";
+        
+        apiKeyInput.placeholder = "Hugging Face API Token (hf_...)";
+        apiNoteText.innerText = t.apiNote;
+
+    } else if (isImageModel(selectedModel)) {
+        // 🎨 KÉP MODELL ESETÉN
+        textSection.classList.add('hidden');
+        aiResponseContainer.classList.add('hidden');
+        audioSection.classList.add('hidden');
+        imageSection.classList.remove('hidden');
+
+        submitBtn.innerText = t.submitBtnImg;
+        promptTipText.innerText = t.promptBoxTipImg;
+        promptInput.placeholder = t.promptPlaceholderImg;
+
+        if (selectedModel === 'pollinations-image') {
+            apiKeyInput.placeholder = "Nem szükséges API kulcs (Optional)";
+            apiNoteText.innerText = t.apiNoteFree;
         } else {
-            textSection.classList.remove('hidden');
-            aiResponseContainer.classList.remove('hidden');
-            imageSection.classList.add('hidden');
-
-            submitBtn.innerText = t.submitBtn;
-            promptTipText.innerText = t.promptBoxTip;
-            promptInput.placeholder = t.promptPlaceholder;
+            apiKeyInput.placeholder = "Hugging Face API Token (hf_...)";
             apiNoteText.innerText = t.apiNote;
+        }
 
-            if (selectedModel.includes("gemini")) {
-                apiKeyInput.placeholder = "GEMINI API KEY...";
-            } else {
-                apiKeyInput.placeholder = "GROQ API KEY...";
-            }
+    } else {
+        // 💬 SZÖVEGES MODELL ESETÉN
+        textSection.classList.remove('hidden');
+        aiResponseContainer.classList.remove('hidden');
+        imageSection.classList.add('hidden');
+        audioSection.classList.add('hidden');
+
+        submitBtn.innerText = t.submitBtn;
+        promptTipText.innerText = t.promptBoxTip;
+        promptInput.placeholder = t.promptPlaceholder;
+        apiNoteText.innerText = t.apiNote;
+
+        if (selectedModel.includes("gemini")) {
+            apiKeyInput.placeholder = "GEMINI API KEY...";
+        } else {
+            apiKeyInput.placeholder = "GROQ API KEY...";
         }
     }
+}
 
     document.getElementById('langSelect').addEventListener('change', (e) => changeLanguage(e.target.value));
     document.getElementById('modelSelect').addEventListener('change', updateUIForSelectedModel);
