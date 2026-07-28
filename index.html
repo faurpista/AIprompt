@@ -420,23 +420,30 @@ body {
 
     // 🚀 A GOMB ÁLTAL HÍVOTT FÜGGVÉNY
     window.handleExecution = async function() {
-        const selectedModel = document.getElementById("modelSelect").value;
-        
-        // HA ZENE MODEL (bármelyik elnevezéssel):
-        if (isAudioModel(selectedModel)) {
-            await generateAudioModel();
-            return;
-        } 
-        
-        // HA KÉP MODEL:
-        if (isImageModel(selectedModel)) {
-            await generateImageModel();
-            return;
-        } 
-        
-        // Csak a szöveges modelleknél ellenőrizzük az API kulcsot:
-        await analyzeTextPrompt(selectedModel);
-    };
+    const selectedModel = document.getElementById("modelSelect").value;
+    
+    // 1. ZENEI MODELL (Minden létező elnevezést elkap!)
+    if (selectedModel === 'meta-musicgen' || selectedModel === 'pollinations-audio') {
+        await generateAudioModel();
+        return; // <-- EZ A LÉNYEG: azonnal kilép, nem kér API kulcsot!
+    }
+    
+    // 2. KÉP MODELL
+    if (selectedModel === 'pollinations-image') {
+        await generateImageModel();
+        return; // <-- Itt is kilép!
+    }
+    
+    // 3. SZÖVEGES MODELLEK (Csak ezek kérnek API kulcsot)
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) {
+        alert("A szöveges modellek használatához kérlek adj meg egy API kulcsot!");
+        return;
+    }
+
+    // Innen megy tovább a szöveg elemzése...
+    analyzeTextPrompt(selectedModel);
+};
 
     // 🎵 ZENEGENERÁLÁS (Meta MusicGen / Pollinations API)
     async function generateAudioModel() {
