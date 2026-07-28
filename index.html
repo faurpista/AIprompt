@@ -244,7 +244,6 @@ body {
                 </select>
             </div>                       
 <!-- Gomb -->
-<button id="openReadmeBtn" class="readme-trigger-btn">
 <!-- Gomb a data-i18n attribútummal -->
 <button id="openReadmeBtn" class="readme-trigger-btn" data-i18n="readmeBtn">
   📖 Segítség / API Kulcsok
@@ -647,12 +646,22 @@ if ('serviceWorker' in navigator) {
 
             // Placeholderek frissítése
             document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-                const key = el.getAttribute('data-i18n-ph');
-                if (t[key]) el.placeholder = t[key];
-            });
+        const key = el.getAttribute('data-i18n-ph');
+        if (t[key]) el.placeholder = t[key];
+    });
 
-            document.getElementById('docTitle').innerText = t.docTitle;
-            updateApiKeyPlaceholder();
+    if (document.getElementById('docTitle')) {
+        document.getElementById('docTitle').innerText = t.docTitle;
+    }
+    
+    // ➕ GARANTÁLT FIX: Közvetlenül frissítjük a Segítség gombot és címeit
+    const btn = document.getElementById('openReadmeBtn');
+    const title = document.getElementById('readmeModalTitle');
+    
+    if (btn && t.readmeBtn) btn.innerText = t.readmeBtn;
+    if (title && t.readmeTitle) title.innerText = t.readmeTitle;
+
+    updateApiKeyPlaceholder();
         }
 
         function updateApiKeyPlaceholder() {
