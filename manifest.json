@@ -1,5 +1,5 @@
 {
-  "name": "Saját PWA App",
+  "name": "AI Prompt",
   "short_name": "PWAApp",
   "start_url": "./index.html",
   "display": "standalone",
