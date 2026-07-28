@@ -324,7 +324,13 @@ body {
     }
 
     // Védelmek
-    document.addEventListener('contextmenu', e => e.preventDefault());
+    // Csak ott tiltja a jobb klikket, ami NEM beviteli mező (input vagy textarea)
+document.addEventListener('contextmenu', e => {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+    }
+});
+
     document.addEventListener('keydown', e => {
         if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) || (e.ctrlKey && ['u','U','s','S'].includes(e.key))) {
             e.preventDefault();
