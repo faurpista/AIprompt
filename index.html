@@ -245,21 +245,25 @@ body {
             </div>                       
 <!-- Gomb -->
 <button id="openReadmeBtn" class="readme-trigger-btn">
+<!-- Gomb a data-i18n attribútummal -->
+<button id="openReadmeBtn" class="readme-trigger-btn" data-i18n="readmeBtn">
   📖 Segítség / API Kulcsok
 </button>
 
-<!-- Modal Overlay & Card -->
+<!-- Modal felugró ablak -->
 <div id="readmeModal" class="modal-overlay">
   <div class="modal-card">
     <div class="modal-header">
-      <h3 class="modal-title">Útmutató & API Beállítások</h3>
+      <!-- A cím is automatikusan frissül a nyelvváltáskor! -->
+      <h3 class="modal-title" id="readmeModalTitle" data-i18n="readmeTitle">Útmutató & API Beállítások</h3>
       <button id="closeReadmeBtn" class="modal-close-btn">✖</button>
     </div>
     <div id="readmeContent" class="modal-body">
-      <p style="text-align: center; color: #6b7280;">Betöltés...</p>
+      <p style="text-align: center; color: #6b7280;">Loading...</p>
     </div>
   </div>
 </div>
+
         </header>
         <!-- Adományozási gomb -->
         <div class="flex justify-center mb-6">
@@ -385,7 +389,7 @@ if ('serviceWorker' in navigator) {
     }
   });
         
-  const modal = document.getElementById('readmeModal');
+    const modal = document.getElementById('readmeModal');
   const openBtn = document.getElementById('openReadmeBtn');
   const closeBtn = document.getElementById('closeReadmeBtn');
   const contentDiv = document.getElementById('readmeContent');
@@ -393,9 +397,24 @@ if ('serviceWorker' in navigator) {
   openBtn.onclick = function() {
     modal.style.display = "flex"; // flex-et használunk a középre igazításhoz
     
-    fetch('README.md')
+    // 1. Megkeressük az aktuális nyelvet (pl. 'hu', 'en', 'fr')
+    // Állítsd be azt a változót, amit az alkalmazásod a nyelv tárolására használ:
+    const activeLang = typeof currentLang !== 'undefined' ? currentLang : 'hu';
+    
+    // 2. Kiválasztjuk a nyelvi beállításokat a translations objektumból
+    const langConfig = translations[activeLang] || translations.hu;
+    const fileToFetch = langConfig.readmeFile || 'README.md';
+
+    // Betöltés jelzése a felhasználónak
+    contentDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Loading...</p>';
+    
+    // 3. Betöltjük a dinamikus README fájlt
+    fetch(fileToFetch)
       .then(response => {
-        if (!response.ok) throw new Error('A README.md nem található.');
+        if (!response.ok) {
+            // Ha az adott nyelvű fájl hiányzik, visszaugrunk a gyökér README.md-re
+            return fetch('README.md').then(res => res.text());
+        }
         return response.text();
       })
       .then(markdownText => {
@@ -403,6 +422,7 @@ if ('serviceWorker' in navigator) {
       })
       .catch(error => {
         contentDiv.innerHTML = '<p style="color:#ef4444; text-align:center;">Hiba történt a leírás betöltésekor.</p>';
+        console.error(error);
       });
   }
 
@@ -415,6 +435,7 @@ if ('serviceWorker' in navigator) {
       modal.style.display = "none";
     }
   }
+
         const translations = {
             hu: {
                 docTitle: "AI Prompt Akadémia",
@@ -449,7 +470,10 @@ if ('serviceWorker' in navigator) {
                 ratingPoor: "Gyenge prompt",
                 descPoor: "Túl kevés információt adtál az AI-nak.",
                 donateBtn: "Támogasd a projektet (Kávé küldése)",
-                langName: "Hungarian"
+                langName: "Hungarian",
+                readmeFile: "README.md", // vagy README_hu.md
+                readmeBtn: "📖 Segítség / API Kulcsok",
+                readmeTitle: "Útmutató & API Beállítások"
             },
             en: {
                 docTitle: "AI Prompt Academy",
@@ -484,7 +508,10 @@ if ('serviceWorker' in navigator) {
                 ratingPoor: "Weak Prompt",
                 descPoor: "Not enough information given to the AI.",
                 donateBtn: "Support the project (Buy me a coffee)",
-                langName: "English"
+                langName: "English",
+                readmeFile: "README_en.md",
+                readmeBtn: "📖 Help / API Keys",
+                readmeTitle: "Guide & API Setup"
             },
             de: {
                 docTitle: "AI Prompt Akademie",
@@ -519,7 +546,10 @@ if ('serviceWorker' in navigator) {
                 ratingPoor: "Schwacher Prompt",
                 descPoor: "Zu wenige Informationen für die KI.",
                 donateBtn: "Projekt unterstützen (Kaffee spenden)",
-                langName: "German"
+                langName: "German",
+                readmeFile: "README_de.md",
+                readmeBtn: "📖 Hilfe / API-Schlüssel",
+                readmeTitle: "Anleitung & API-Einrichtung"
             },
             fr: {
                 docTitle: "Académie de Prompt AI",
@@ -554,7 +584,10 @@ if ('serviceWorker' in navigator) {
                 ratingPoor: "Prompt faible",
                 descPoor: "Pas assez d'informations fournies à l'IA.",
                 donateBtn: "Soutenir le projet (Offrir un café)",
-                langName: "French"
+                langName: "French",
+                readmeFile: "README_fr.md",
+                readmeBtn: "📖 Aide / Clés API",
+                readmeTitle: "Guide & Configuration API"
             },
             pl: {
                 docTitle: "Akademia Promptowania AI",
@@ -589,7 +622,10 @@ if ('serviceWorker' in navigator) {
                 ratingPoor: "Słaby prompt",
                 descPoor: "Za mało informacji przekazanych dla AI.",
                 donateBtn: "Wesprzyj projekt (Kup kawę)",
-                langName: "Polish"
+                langName: "Polish",
+                readmeFile: "README_pl.md",
+                readmeBtn: "📖 Pomoc / Klucze API",
+                readmeTitle: "Instrukcja i Konfiguracja API"
             }
         };
 
