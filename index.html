@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+8<!DOCTYPE html>
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,208 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- 1. Importáljuk a Markdown átalakítót (Marked.js) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  /* Gomb stílusa, ami megnyitja a modalt */
+  .readme-trigger-btn {
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .readme-trigger-btn:hover {
+    background-color: #1d4ed8;
+  }
+
+  .readme-trigger-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Modal sötétített háttér (Backdrop) */
+  .modal-overlay {
+    display: none; /* Alapértelmezetten rejtett */
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px); /* Finom elmosás a háttérben */
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  /* Modal ablak konténere */
+  .modal-card {
+    background-color: #ffffff;
+    color: #1f2937;
+    width: 100%;
+    max-width: 760px;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: slideUp 0.25s ease-out;
+  }
+
+  /* Fejléc és bezáró gomb */
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+  }
+
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color 0.15s, background-color 0.15s;
+  }
+
+  .modal-close-btn:hover {
+    color: #111827;
+    background-color: #f3f4f6;
+  }
+
+  /* README Tartalom terület formázása */
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* Formázások a betöltött Markdown tartalomhoz */
+  .modal-body h1, .modal-body h2, .modal-body h3 {
+    color: #111827;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 700;
+  }
+
+  .modal-body h1:first-child, .modal-body h2:first-child {
+    margin-top: 0;
+  }
+
+  .modal-body h2 {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.3em;
+  }
+
+  .modal-body hr {
+    border: 0;
+    height: 1px;
+    background: #e5e7eb;
+    margin: 24px 0;
+  }
+
+  .modal-body code {
+    background-color: #f3f4f6;
+    color: #d97706;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .modal-body pre code {
+    display: block;
+    padding: 12px;
+    background-color: #1f2937;
+    color: #f9fafb;
+    overflow-x: auto;
+    border-radius: 6px;
+  }
+
+  .modal-body a {
+    color: #2563eb;
+    text-decoration: none;
+  }
+
+  .modal-body a:hover {
+    text-decoration: underline;
+  }
+
+  .modal-body ol, .modal-body ul {
+    padding-left: 20px;
+    margin-bottom: 1em;
+  }
+
+  .modal-body li {
+    margin-bottom: 6px;
+  }
+
+  /* Animációk */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Automatikus Sötét Mód támogatás (ha a felhasználó gépe sötét módban van) */
+  @media (prefers-color-scheme: dark) {
+    .modal-card {
+      background-color: #1e293b;
+      color: #e2e8f0;
+    }
+    .modal-header {
+      border-bottom-color: #334155;
+    }
+    .modal-title {
+      color: #f8fafc;
+    }
+    .modal-close-btn {
+      color: #94a3b8;
+    }
+    .modal-close-btn:hover {
+      color: #f8fafc;
+      background-color: #334155;
+    }
+    .modal-body h1, .modal-body h2, .modal-body h3 {
+      color: #f8fafc;
+    }
+    .modal-body h2, .modal-body hr {
+      border-color: #334155;
+      background-color: #334155;
+    }
+    .modal-body code {
+      background-color: #0f172a;
+      color: #fbbf24;
+    }
+    .modal-body a {
+      color: #60a5fa;
+    }
+  }
+</style>
 
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
@@ -27,19 +229,21 @@
                     <option value="en">English</option>
                     <option value="de">Deutsch</option>
                     <option value="fr">Français</option>
-                    <option value="pl">Polski</option>
-                </select>
-            </div>
-            <!-- 2. Gomb a felugró ablak megnyitásához -->
-<button id="openReadmeBtn">📖 Segítség / API Kulcsok beszerzése</button>
+                    <option<!-- Gomb -->
+<button id="openReadmeBtn" class="readme-trigger-btn">
+  📖 Segítség / API Kulcsok
+</button>
 
-<!-- 3. A felugró ablak (Modal) szerkezete -->
-<div id="readmeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
-  <div style="background:white; margin: 5% auto; padding: 20px; width: 80%; max-width: 800px; height: 80vh; overflow-y: auto; border-radius: 8px; position:relative; color: #333;">
-    <button id="closeReadmeBtn" style="position:absolute; top:10px; right:15px; font-size:20px; cursor:pointer;">✖</button>
-    
-    <!-- Ide fog betöltődni a README tartalma -->
-    <div id="readmeContent">Betöltés...</div>
+<!-- Modal Overlay & Card -->
+<div id="readmeModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title">Útmutató & API Beállítások</h3>
+      <button id="closeReadmeBtn" class="modal-close-btn">✖</button>
+    </div>
+    <div id="readmeContent" class="modal-body">
+      <p style="text-align: center; color: #6b7280;">Betöltés...</p>
+    </div>
   </div>
 </div>
         </header>
@@ -135,29 +339,24 @@
 
     <!-- JavaScript Logika & Szótár -->
     <script>
-         const modal = document.getElementById('readmeModal');
+          const modal = document.getElementById('readmeModal');
   const openBtn = document.getElementById('openReadmeBtn');
   const closeBtn = document.getElementById('closeReadmeBtn');
   const contentDiv = document.getElementById('readmeContent');
 
   openBtn.onclick = function() {
-    modal.style.display = "block";
+    modal.style.display = "flex"; // flex-et használunk a középre igazításhoz
     
-    // Betöltjük a saját weboldaladon lévő README.md fájlt
     fetch('README.md')
       .then(response => {
-        if (!response.ok) {
-            throw new Error('A README.md fájl nem található!');
-        }
+        if (!response.ok) throw new Error('A README.md nem található.');
         return response.text();
       })
       .then(markdownText => {
-        // Átalakítjuk a Markdown szöveget HTML-lé
         contentDiv.innerHTML = marked.parse(markdownText);
       })
       .catch(error => {
-        contentDiv.innerHTML = '<p style="color:red;">Hiba történt a leírás betöltésekor.</p>';
-        console.error(error);
+        contentDiv.innerHTML = '<p style="color:#ef4444; text-align:center;">Hiba történt a leírás betöltésekor.</p>';
       });
   }
 
@@ -165,12 +364,11 @@
     modal.style.display = "none";
   }
 
-  // Bezárás, ha a sötét hátttérre kattint a felhasználó
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
-      }
+  }
         const translations = {
             hu: {
                 docTitle: "AI Prompt Akadémia",
