@@ -1,5 +1,5 @@
 {
-  "name": "AI Prompt",
+  "name": "AIPrompt",
   "short_name": "PWAApp",
   "start_url": "./index.html",
   "display": "standalone",
