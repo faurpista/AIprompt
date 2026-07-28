@@ -9,6 +9,14 @@
     <!-- 1. Importáljuk a Markdown átalakítót (Marked.js) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
+
+    /* Ezt tedd a <style> blokkba */
+body {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
   /* Gomb stílusa, ami megnyitja a modalt */
   .readme-trigger-btn {
     background-color: #2563eb;
@@ -342,7 +350,32 @@
 
     <!-- JavaScript Logika & Szótár -->
     <script>
-          const modal = document.getElementById('readmeModal');
+ // 1. Jobb klikk tiltása
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  // 2. Billentyűkombinációk tiltása (F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S)
+  document.addEventListener('keydown', function(e) {
+    // F12 tiltása
+    if (e.key === "F12") {
+      e.preventDefault();
+    }
+    // Ctrl+Shift+I (DevTools), Ctrl+Shift+J (Console), Ctrl+Shift+C (Element inspector)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+      e.preventDefault();
+    }
+    // Ctrl+U (Forráskód megtekintése)
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+      e.preventDefault();
+    }
+    // Ctrl+S (Mentés)
+    if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+      e.preventDefault();
+    }
+  });
+        
+  const modal = document.getElementById('readmeModal');
   const openBtn = document.getElementById('openReadmeBtn');
   const closeBtn = document.getElementById('closeReadmeBtn');
   const contentDiv = document.getElementById('readmeContent');
