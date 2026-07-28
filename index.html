@@ -388,31 +388,31 @@ if ('serviceWorker' in navigator) {
     }
   });
         
-    const modal = document.getElementById('readmeModal');
+      const modal = document.getElementById('readmeModal');
   const openBtn = document.getElementById('openReadmeBtn');
   const closeBtn = document.getElementById('closeReadmeBtn');
   const contentDiv = document.getElementById('readmeContent');
 
   openBtn.onclick = function() {
-    modal.style.display = "flex"; // flex-et használunk a középre igazításhoz
+    modal.style.display = "flex";
     
-    // 1. Megkeressük az aktuális nyelvet (pl. 'hu', 'en', 'fr')
-    // Állítsd be azt a változót, amit az alkalmazásod a nyelv tárolására használ:
-    const activeLang = typeof currentLang !== 'undefined' ? currentLang : 'hu';
-    
-    // 2. Kiválasztjuk a nyelvi beállításokat a translations objektumból
+    // 1. Megkeressük az aktuális nyelvet
+    const activeLang = (typeof currentLang !== 'undefined' && currentLang) ? currentLang : 'hu';
     const langConfig = translations[activeLang] || translations.hu;
-    const fileToFetch = langConfig.readmeFile || 'README.md';
-
-    // Betöltés jelzése a felhasználónak
-    contentDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Loading...</p>';
     
-    // 3. Betöltjük a dinamikus README fájlt
+    // Ha a szótárban nincs megadva readmeFile, a nyelv kódja alapján állítjuk össze (pl. README_en.md)
+    const fileToFetch = langConfig.readmeFile || (activeLang === 'hu' ? 'README.md' : `README_${activeLang}.md`);
+
+    console.log("Megpróbálom betölteni ezt a fájlt:", fileToFetch);
+
+    contentDiv.innerHTML = `<p style="text-align: center; color: #6b7280;">Betöltés (${activeLang.toUpperCase()})...</p>`;
+    
+    // 2. Betöltés megkísérlése
     fetch(fileToFetch)
       .then(response => {
         if (!response.ok) {
-            // Ha az adott nyelvű fájl hiányzik, visszaugrunk a gyökér README.md-re
-            return fetch('README.md').then(res => res.text());
+          // Ha nem találja a fájlt (404), dobjon hibát ahelyett, hogy visszaugrana magyarra!
+          throw new Error(`A(z) "${fileToFetch}" fájl nem található a szerveren (HTTP ${response.status}).`);
         }
         return response.text();
       })
@@ -420,19 +420,21 @@ if ('serviceWorker' in navigator) {
         contentDiv.innerHTML = marked.parse(markdownText);
       })
       .catch(error => {
-        contentDiv.innerHTML = '<p style="color:#ef4444; text-align:center;">Hiba történt a leírás betöltésekor.</p>';
-        console.error(error);
+        // Pontos hibaüzenet megjelenítése a felhasználónak
+        contentDiv.innerHTML = `
+          <div style="text-align: center; color: #ef4444; padding: 20px;">
+            <p style="font-weight: bold; margin-bottom: 8px;">⚠️ Betöltési hiba</p>
+            <p style="font-size: 0.9em; color: #374151;">${error.message}</p>
+            <p style="font-size: 0.8em; color: #6b7280; margin-top: 12px;">
+              Győződj meg róla, hogy a fájl fel van töltve a GitHub repóba pontosan ezen a néven!
+            </p>
+          </div>`;
       });
   }
 
-  closeBtn.onclick = function() {
-    modal.style.display = "none";
-  }
+  closeBtn.onclick = function() { modal.style.display = "none"; }
+  window.onclick = function(event) { if (event.target == modal) modal.style.display = "none"; }
 
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
   }
 
         const translations = {
