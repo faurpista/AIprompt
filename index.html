@@ -388,54 +388,53 @@ if ('serviceWorker' in navigator) {
     }
   });
         
-      const modal = document.getElementById('readmeModal');
-  const openBtn = document.getElementById('openReadmeBtn');
-  const closeBtn = document.getElementById('closeReadmeBtn');
-  const contentDiv = document.getElementById('readmeContent');
+      document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('readmeModal');
+    const openBtn = document.getElementById('openReadmeBtn');
+    const closeBtn = document.getElementById('closeReadmeBtn');
+    const contentDiv = document.getElementById('readmeContent');
 
-  openBtn.onclick = function() {
-    modal.style.display = "flex";
-    
-    // 1. Megkeressük az aktuális nyelvet
-    const activeLang = (typeof currentLang !== 'undefined' && currentLang) ? currentLang : 'hu';
-    const langConfig = translations[activeLang] || translations.hu;
-    
-    // Ha a szótárban nincs megadva readmeFile, a nyelv kódja alapján állítjuk össze (pl. README_en.md)
-    const fileToFetch = langConfig.readmeFile || (activeLang === 'hu' ? 'README.md' : `README_${activeLang}.md`);
+    if (openBtn) {
+        openBtn.onclick = function() {
+            modal.style.display = "flex";
+            
+            // Lekérjük az aktuális nyelvet (pl. 'hu', 'en', 'fr', 'de', 'pl')
+            const activeLang = (typeof currentLang !== 'undefined' && currentLang) ? currentLang : 'hu';
+            const langConfig = translations[activeLang] || translations.hu;
+            
+            // Fájlnév meghatározása (ha nincs megadva a szótárban, generáljuk: README_en.md)
+            const fileToFetch = langConfig.readmeFile || (activeLang === 'hu' ? 'README.md' : `README_${activeLang}.md`);
 
-    console.log("Megpróbálom betölteni ezt a fájlt:", fileToFetch);
+            contentDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Loading...</p>';
+            
+            // Betöltés megkísérlése
+            fetch(fileToFetch)
+              .then(response => {
+                if (!response.ok) {
+                    throw new Error(`A "${fileToFetch}" fájl nem található ezen a címen.`);
+                }
+                return response.text();
+              })
+              .then(markdownText => {
+                contentDiv.innerHTML = marked.parse(markdownText);
+              })
+              .catch(error => {
+                contentDiv.innerHTML = `
+                  <div style="text-align: center; color: #ef4444; padding: 15px;">
+                    <p style="font-weight: bold; margin-bottom: 5px;">⚠️ Hiba a leírás betöltésekor</p>
+                    <p style="font-size: 0.85em; color: #4b5563;">${error.message}</p>
+                  </div>`;
+              });
+        };
+    }
 
-    contentDiv.innerHTML = `<p style="text-align: center; color: #6b7280;">Betöltés (${activeLang.toUpperCase()})...</p>`;
-    
-    // 2. Betöltés megkísérlése
-    fetch(fileToFetch)
-      .then(response => {
-        if (!response.ok) {
-          // Ha nem találja a fájlt (404), dobjon hibát ahelyett, hogy visszaugrana magyarra!
-          throw new Error(`A(z) "${fileToFetch}" fájl nem található a szerveren (HTTP ${response.status}).`);
-        }
-        return response.text();
-      })
-      .then(markdownText => {
-        contentDiv.innerHTML = marked.parse(markdownText);
-      })
-      .catch(error => {
-        // Pontos hibaüzenet megjelenítése a felhasználónak
-        contentDiv.innerHTML = `
-          <div style="text-align: center; color: #ef4444; padding: 20px;">
-            <p style="font-weight: bold; margin-bottom: 8px;">⚠️ Betöltési hiba</p>
-            <p style="font-size: 0.9em; color: #374151;">${error.message}</p>
-            <p style="font-size: 0.8em; color: #6b7280; margin-top: 12px;">
-              Győződj meg róla, hogy a fájl fel van töltve a GitHub repóba pontosan ezen a néven!
-            </p>
-          </div>`;
-      });
-  }
+    if (closeBtn) {
+        closeBtn.onclick = function() { modal.style.display = "none"; };
+    }
 
-  closeBtn.onclick = function() { modal.style.display = "none"; }
-  window.onclick = function(event) { if (event.target == modal) modal.style.display = "none"; }
-
-  }
+    window.onclick = function(event) {
+        if (event.target == modal) modal.style.display = "none"; };
+});
 let currentLang = 'hu'; // Alapértelmezett nyelv
 
         const translations = {
@@ -634,39 +633,43 @@ let currentLang = 'hu'; // Alapértelmezett nyelv
         let currentLang = localStorage.getItem('preferredLang') || 'hu';
 
         function changeLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('preferredLang', lang);
-            document.getElementById('langSelect').value = lang;
-            document.documentElement.lang = lang;
+    currentLang = lang;
+    localStorage.setItem('preferredLang', lang);
+    
+    const langSelect = document.getElementById('langSelect');
+    if (langSelect) langSelect.value = lang;
+    document.documentElement.lang = lang;
 
-            const t = translations[lang];
+    const t = translations[lang] || translations.hu;
 
-            // Szövegek frissítése
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (t[key]) el.innerText = t[key];
-            });
-
-            // Placeholderek frissítése
-            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-        const key = el.getAttribute('data-i18n-ph');
-        if (t[key]) el.placeholder = t[key];
+    // Szövegek frissítése attribútum alapján (data-i18n)
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t && t[key]) el.innerText = t[key];
     });
 
-    if (document.getElementById('docTitle')) {
+    // Placeholderek frissítése
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        if (t && t[key]) el.placeholder = t[key];
+    });
+
+    // Egyedi mezők frissítése
+    if (document.getElementById('docTitle') && t.docTitle) {
         document.getElementById('docTitle').innerText = t.docTitle;
     }
     
-    // ➕ GARANTÁLT FIX: Közvetlenül frissítjük a Segítség gombot és címeit
-    const btn = document.getElementById('openReadmeBtn');
-    const title = document.getElementById('readmeModalTitle');
-    
-    if (btn && t.readmeBtn) btn.innerText = t.readmeBtn;
-    if (title && t.readmeTitle) title.innerText = t.readmeTitle;
+    // 🎯 GOMBSZÖVEG ÉS MODAL CÍM BIZTOS FRISSÍTÉSE:
+    const btnText = document.getElementById('readmeBtnText');
+    if (btnText && t.readmeBtn) btnText.innerText = t.readmeBtn;
 
-    updateApiKeyPlaceholder();
+    const modalTitle = document.getElementById('readmeModalTitle');
+    if (modalTitle && t.readmeTitle) modalTitle.innerText = t.readmeTitle;
+
+    if (typeof updateApiKeyPlaceholder === 'function') {
+        updateApiKeyPlaceholder();
+    }
         }
-
         function updateApiKeyPlaceholder() {
             const selectedModel = document.getElementById("modelSelect").value;
             const apiKeyInput = document.getElementById('apiKey');
