@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="docTitle"></title>
+    <!-- Manifest linkelése relatív útvonallal -->
+    <link rel="manifest" href="./manifest.json">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- 1. Importáljuk a Markdown átalakítót (Marked.js) -->
@@ -350,6 +353,13 @@ body {
 
     <!-- JavaScript Logika & Szótár -->
     <script>
+
+if ('serviceWorker' in navigator) {
+    // Relatív útvonal a scope-pal
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(() => console.log('PWA Service Worker sikeresen regisztrálva!'))
+      .catch((err) => console.error('SW Hiba:', err));
+}
  // 1. Jobb klikk tiltása
   document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
