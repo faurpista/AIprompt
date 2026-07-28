@@ -1,31 +1,30 @@
-// sw.js - Service Worker a PWA működéséhez
-const CACHE_NAME = 'pwa-cache-v9';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+// Írd át a verziószámot (pl. v2, v3), ha módosítasz a kódodon!
+const CACHE_NAME = 'prompt-akademia-v9';
 
-// Telepítés és fájlok elmentése
+// Telepítéskor az új fájlokat gyorsítótárazzuk
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-  self.skipWaiting();
+    self.skipWaiting(); // Azonnal átveszi az irányítást, nem vár a lap bezárására
 });
 
-// Aktiválás
+// Aktiváláskor TÖRÖLJÜK A RÉGI CACHE-T!
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cache) => {
+                    if (cache !== CACHE_NAME) {
+                        console.log('Régi Service Worker Cache törlése:', cache);
+                        return caches.delete(cache); // Törli a beragadt régi JS fájlokat!
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
-// Kérések kezelése
+// Hálózati kérések kezelése (Network First stratégia, hogy mindig a legújabb kódot töltse le)
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
-  );
+    event.respondWith(
+        fetch(event.request).catch(() => caches.match(event.request))
+    );
 });
