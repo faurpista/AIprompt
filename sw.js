@@ -1,5 +1,5 @@
 // Írd át a verziószámot (pl. v2, v3), ha módosítasz a kódodon!
-const CACHE_NAME = 'prompt-akademia-v11';
+const CACHE_NAME = 'prompt-akademia-v12';
 
 // Telepítéskor az új fájlokat gyorsítótárazzuk
 self.addEventListener('install', (event) => {
