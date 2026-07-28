@@ -592,7 +592,7 @@ body {
 
         const encodedPrompt = encodeURIComponent(userPrompt);
         const seed = Math.floor(Math.random() * 1000000);
-        const audioUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio&seed=${seed}`;
+        const audioUrl = `https://pollinations.ai/p/${encodedPrompt}?model=music&seed=${seed}`;
 
         audioElement.src = audioUrl;
 
