@@ -325,11 +325,13 @@ body {
 
     // Védelmek
     // Csak ott tiltja a jobb klikket, ami NEM beviteli mező (input vagy textarea)
+// Védelmek (kivéve a beviteli mezőknél, hogy mobilon is lehessen beilleszteni)
 document.addEventListener('contextmenu', e => {
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
         e.preventDefault();
     }
 });
+
 
     document.addEventListener('keydown', e => {
         if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) || (e.ctrlKey && ['u','U','s','S'].includes(e.key))) {
