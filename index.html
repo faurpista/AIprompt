@@ -446,52 +446,59 @@ body {
 };
 
     // 🎵 ZENEGENERÁLÁS (Meta MusicGen / Pollinations API)
-    async function generateAudioModel() {
-        const t = translations[currentLang] || translations.hu;
-        const userPrompt = document.getElementById('userPrompt').value.trim();
-        const submitBtn = document.getElementById('submitBtn');
-        const audioPlaceholder = document.getElementById('audioPlaceholder');
-        const audioContainer = document.getElementById('audioContainer');
-        const audioElement = document.getElementById('generatedAudio');
-        const downloadBtn = document.getElementById('downloadAudioBtn');
+    // 🎵 ZENEGENERÁLÁS (Stabilabb URL-alapú betöltés)
+async function generateAudioModel() {
+    const t = translations[currentLang] || translations.hu;
+    const userPrompt = document.getElementById('userPrompt').value.trim();
+    const submitBtn = document.getElementById('submitBtn');
+    const audioPlaceholder = document.getElementById('audioPlaceholder');
+    const audioContainer = document.getElementById('audioContainer');
+    const audioElement = document.getElementById('generatedAudio');
+    const downloadBtn = document.getElementById('downloadAudioBtn');
 
-        if (!userPrompt) { alert(t.errPrompt); return; }
-
-        submitBtn.disabled = true;
-        submitBtn.innerText = t.generatingAudioBtn;
-        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene komponálása folyamatban (Meta MusicGen)...</span>`;
-        audioPlaceholder.classList.remove('hidden');
-        audioContainer.classList.add('hidden');
-        downloadBtn.classList.add('hidden');
-
-        try {
-            const encodedPrompt = encodeURIComponent(userPrompt);
-            const audioUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio`;
-
-            const response = await fetch(audioUrl);
-            if (!response.ok) throw new Error("Szerver hiba történt a generáláskor.");
-
-            const blob = await response.blob();
-            const objectUrl = URL.createObjectURL(blob);
-
-            audioElement.src = objectUrl;
-            audioPlaceholder.classList.add('hidden');
-            audioContainer.classList.remove('hidden');
-            
-            downloadBtn.href = objectUrl;
-            downloadBtn.download = "generalt-zene.mp3";
-            downloadBtn.classList.remove('hidden');
-
-            audioElement.play().catch(e => console.log("Auto-play letiltva."));
-
-        } catch (error) {
-            console.error(error);
-            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">Hiba: ${error.message}</span>`;
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerText = t.submitBtnAudio;
-        }
+    if (!userPrompt) { 
+        alert(t.errPrompt || "Írj be egy promptot!"); 
+        return; 
     }
+
+    // UI Állapot frissítése
+    submitBtn.disabled = true;
+    submitBtn.innerText = t.generatingAudioBtn || "🎵 Zene komponálása...";
+    audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene komponálása folyamatban (Meta MusicGen)...<br><span class="text-xs text-gray-400 font-normal">(Ez eltarthat 10-20 másodpercig)</span></span>`;
+    audioPlaceholder.classList.remove('hidden');
+    audioContainer.classList.add('hidden');
+    downloadBtn.classList.add('hidden');
+
+    // Egyedi URL generálása seed-del, hogy elkerüljük a böngésző cache-t
+    const encodedPrompt = encodeURIComponent(userPrompt);
+    const seed = Math.floor(Math.random() * 1000000);
+    const audioUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio&seed=${seed}`;
+
+    // Közvetlen audio betöltés eseménykezelőkkel (Fetch/Blob nélkül!)
+    audioElement.src = audioUrl;
+
+    // Amikor a szerver elkészült és a böngésző be tudja tölteni az audiót:
+    audioElement.oncanplaythrough = () => {
+        audioPlaceholder.classList.add('hidden');
+        audioContainer.classList.remove('hidden');
+        
+        downloadBtn.href = audioUrl;
+        downloadBtn.target = "_blank";
+        downloadBtn.classList.remove('hidden');
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = t.submitBtnAudio || "🎵 Zene Generálása";
+        audioElement.play().catch(() => console.log("Auto-play böngésző által letiltva."));
+    };
+
+    // Ha a szerver nem tudta legyártani a zenét (500/503 hiba):
+    audioElement.onerror = () => {
+        audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">⚠️ A zeneszerver jelenleg túlterhelt vagy nem érhető el.<br><span class="text-xs text-gray-300">Próbáld meg újra 10 másodperc múlva, vagy módosítsd a promptot!</span></span>`;
+        submitBtn.disabled = false;
+        submitBtn.innerText = t.submitBtnAudio || "🎵 Zene Generálása";
+    };
+}
+
 
     // 🎨 KÉPGENERÁLÁS
     async function generateImageModel() {
