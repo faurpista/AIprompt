@@ -1,5 +1,5 @@
 // sw.js - Service Worker a PWA működéséhez
-const CACHE_NAME = 'pwa-cache-v5';
+const CACHE_NAME = 'pwa-cache-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
