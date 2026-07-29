@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="docTitle">AI Prompt Akadémia</title>
+    <link rel="manifest" href="./manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+body {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+  .readme-trigger-btn {
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .readme-trigger-btn:hover { background-color: #1d4ed8; }
+  .readme-trigger-btn:active { transform: scale(0.98); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .modal-card {
+    background-color: #ffffff;
+    color: #1f2937;
+    width: 100%;
+    max-width: 760px;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: slideUp 0.25s ease-out;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+  }
+
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .modal-close-btn:hover {
+    color: #111827;
+    background-color: #f3f4f6;
+  }
+
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .modal-body h1, .modal-body h2, .modal-body h3 {
+    color: #111827;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 700;
+  }
+
+  .modal-body code {
+    background-color: #f3f4f6;
+    color: #d97706;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  @media (prefers-color-scheme: dark) {
+    .modal-card { background-color: #1e293b; color: #e2e8f0; }
+    .modal-header { border-bottom-color: #334155; }
+    .modal-title { color: #f8fafc; }
+    .modal-close-btn { color: #94a3b8; }
+    .modal-close-btn:hover { color: #f8fafc; background-color: #334155; }
+    .modal-body h1, .modal-body h2, .modal-body h3 { color: #f8fafc; }
+    .modal-body code { background-color: #0f172a; color: #fbbf24; }
+  }
+</style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <!-- Fejléc & Nyelvválasztó -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="text-center md:text-left">
+                <h1 id="mainTitle" class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">Prompt Mérnök Képző</h1>
+                <p id="mainSubtitle" class="text-gray-400 text-lg">Tanuld meg a tökéletes prompt felépítését és teszteld a szöveges, kép vagy zene modelleket!</p>
+            </div>
+            
+            <!-- Nyelvválasztó Dropdown -->
+            <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-700">
+                <span class="text-sm text-gray-400">🌐</span>
+                <select id="langSelect" class="bg-gray-700 text-white p-1.5 rounded border border-gray-600 text-sm focus:outline-none focus:border-cyan-500 cursor-pointer">
+                    <option value="hu">Magyar</option>
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                    <option value="fr">Français</option>
+                    <option value="pl">Polski</option>
+                </select>
+            </div>                       
+            
+            <!-- Segítség Gomb -->
+            <button id="openReadmeBtn" class="readme-trigger-btn">
+              📖 <span id="readmeBtnText">Segítség / API Kulcsok</span>
+            </button>
+
+            <!-- Modal felugró ablak -->
+            <div id="readmeModal" class="modal-overlay">
+              <div class="modal-card">
+                <div class="modal-header">
+                  <h3 class="modal-title" id="readmeModalTitle">Útmutató & API Beállítások</h3>
+                  <button id="closeReadmeBtn" class="modal-close-btn">✖</button>
+                </div>
+                <div id="readmeContent" class="modal-body">
+                  <p style="text-align: center; color: #6b7280;">Útmutató betöltése...</p>
+                </div>
+              </div>
+            </div>
+        </header>
+
+        <!-- Adományos gomb -->
+        <div class="flex justify-center mb-6">
+            <a href="https://ko-fi.com/istvanfaur" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-lg shadow-md transition duration-200 text-sm">
+                <span>☕</span>
+                <span id="donateBtn">Támogasd a projektet</span>
+            </a>
+        </div>
+
+        <!-- Beállítások panel -->
+        <div class="bg-gray-800 p-4 rounded-xl mb-6 border border-gray-700 shadow-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="apiKeyContainer">
+                    <label id="apiKeyLabel" class="block text-sm font-medium text-gray-400 mb-1">API Kulcs:</label>
+                    <input type="password" id="apiKey" placeholder="GROQ, GEMINI vagy HUGGING FACE API KEY..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label id="modelLabel" class="block text-sm font-medium text-gray-400 mb-1">Válassz modellt:</label>
+                    <select id="modelSelect" class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        <optgroup label="📝 Szöveges Modellek (API Kulcs kell)">
+                            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Groq)</option>
+                            <option value="gemini-2.5-flash">gemini-2.5-flash (Google)</option>
+                            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Groq)</option>
+                        </optgroup>
+                        <optgroup label="🎨 Képgeneráló Modell (Ingyenes)">
+                            <option value="pollinations-image">Pollinations.ai (Ingyenes kép)</option>
+                        </optgroup>
+                        <optgroup label="🎵 Zenei Modell (Hugging Face API Kulcs kell)">
+                            <option value="meta-musicgen">🎵 Meta MusicGen / Audio</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <p id="apiNoteText" class="text-xs text-gray-500 mt-1"></p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Bal oldal: Prompt írás -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
+                <div>
+                    <h2 id="promptBoxTitle" class="text-xl font-bold mb-4 text-cyan-400">Írd ide a promptodat</h2>
+                    <p id="promptTipText" class="text-xs text-gray-400 mb-2"></p>
+                    <textarea id="userPrompt" rows="8" class="w-full p-3 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 mb-4 resize-none"></textarea>
+                </div>
+                <button onclick="handleExecution()" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md transition duration-200 cursor-pointer">
+                    Tesztelés és Értékelés
+                </button>
+            </div>
+
+            <!-- Jobb oldal: Értékelés ÉS Kép/Zene Megjelenítő Panel -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                <!-- 1. Szöveg értékelő szekció -->
+                <div id="textEvalSection">
+                    <h2 id="evalTitle" class="text-xl font-bold mb-4 text-cyan-400">AI Kiértékelés</h2>
+                    
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-gray-600" id="scoreCircle">
+                            <span class="text-2xl font-black text-white" id="scoreText">0%</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg" id="ratingLabel">Várakozás a promptra...</h3>
+                            <p class="text-sm text-gray-400" id="ratingDesc">Kattints a gombra az elemzéshez.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblRole">Szerepkör (Role)</span><span id="p-role">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-role" class="bg-cyan-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblContext">Kontextus (Context)</span><span id="p-context">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-context" class="bg-blue-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblTask">Feladat (Task)</span><span id="p-task">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-task" class="bg-purple-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblConstraints">Korlátozások (Constraints)</span><span id="p-constraints">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-constraints" class="bg-pink-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-950 p-4 rounded-lg border border-gray-700 max-h-48 overflow-y-auto">
+                        <h4 id="feedbackTitle" class="text-xs font-bold uppercase text-gray-400 mb-1">Javaslat a javításra:</h4>
+                        <p id="feedbackText" class="text-sm text-gray-300 italic">Itt fog megjelenni az AI részletes tanácsa...</p>
+                    </div>
+                </div>
+
+                <!-- 2. Képgeneráló szekció -->
+                <div id="imageEvalSection" class="hidden flex flex-col justify-between h-full">
+                    <div>
+                        <h2 id="generatedImgTitle" class="text-xl font-bold mb-4 text-pink-400">Generált Kép</h2>
+                        <div class="bg-gray-950 p-2 rounded-xl border border-gray-700 min-h-[280px] flex items-center justify-center relative overflow-hidden">
+                            <div id="imagePlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-4xl block mb-2">🖼️</span>
+                                <span id="imagePlaceholderText">Írj egy leírást angolul a jobb eredményért, majd kattints a generálás gombra!</span>
+                            </div>
+                            <img id="generatedImage" class="w-full h-auto max-h-[350px] object-contain rounded-lg hidden shadow-lg" alt="AI Generated Image" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a id="downloadImgBtn" href="#" download="generated-image.png" class="hidden w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-center shadow-md transition duration-200">
+                            📥 <span id="downloadBtnText">Kép Letöltése</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. Zenegeneráló szekció -->
+                <div id="audioEvalSection" class="hidden flex flex-col justify-between h-full">
+                    <div>
+                        <h2 id="audioTitle" class="text-xl font-bold mb-4 text-purple-400">🎵 Generált Zene (Meta MusicGen)</h2>
+                        <div class="bg-gray-950 p-6 rounded-xl border border-gray-700 min-h-[280px] flex flex-col items-center justify-center relative">
+                            <div id="audioPlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-5xl block mb-3">🎧</span>
+                                <span id="audioPlaceholderText" class="text-sm">Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!</span>
+                            </div>
+                            
+                            <div id="audioContainer" class="hidden w-full flex flex-col items-center space-y-4">
+                                <div class="w-20 h-20 rounded-full bg-purple-900/50 border-2 border-purple-500 flex items-center justify-center animate-pulse">
+                                    <span class="text-3xl">🎶</span>
+                                </div>
+                                <audio id="generatedAudio" controls class="w-full mt-4 rounded-lg"></audio>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a id="downloadAudioBtn" href="#" download="generated-music.wav" class="hidden w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-center shadow-md transition duration-200">
+                            📥 <span id="downloadAudioBtnText">Zene Letöltése (.wav)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Válasz -->
+        <div id="aiResponseContainer" class="mt-6 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+            <h2 id="aiRespTitle" class="text-lg font-bold mb-2 text-emerald-400">Hogyan válaszolna erre az AI?</h2>
+            <div id="aiResponse" class="bg-gray-900 p-4 rounded-lg text-sm text-gray-300 min-h-16 whitespace-pre-line border border-gray-700">
+                A promptodra adott tényleges AI válasz itt fog megjelenni...
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('contextmenu', e => {
+        if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+        }
+    });
+
+    const isImageModel = (model) => model === 'pollinations-image';
+    const isAudioModel = (model) => model === 'pollinations-audio' || model === 'meta-musicgen';
+
+    // MULTI-LANGUAGE TRANSLATIONS (HU, EN, DE, FR, PL)
+    const translations = {
+        hu: {
+            mainTitle: "Prompt Mérnök Képző",
+            mainSubtitle: "Tanuld meg a tökéletes prompt felépítését és teszteld a szöveges, kép vagy zene modelleket!",
+            readmeBtnText: "Segítség / API Kulcsok",
+            readmeModalTitle: "Útmutató & API Beállítások",
+            donateBtn: "Támogasd a projektet",
+            apiKeyLabel: "API Kulcs:",
+            apiKeyHfLabel: "Hugging Face API Kulcs:",
+            modelLabel: "Válassz modellt:",
+            apiNote: "A kulcsod közvetlenül az API-hoz beszél, nem mentődik el.",
+            apiNoteFree: "Ehhez a modellhez NEM szükséges API kulcs! Ingyenesen működik.",
+            apiNoteHf: "A MusicGen modell futtatásához ingyenes Hugging Face API kulcs szükséges.",
+            promptBoxTitle: "Írd ide a promptodat",
+            promptBoxTip: "Tipp: Tartalmazzon Szerepkört (Role), Kontextust (Context), Feladatot (Task) és Korlátozásokat (Constraints).",
+            promptBoxTipImg: "Tipp képgeneráláshoz: Írj részletes angol leírást!",
+            promptBoxTipAudio: "Tipp zene generáláshoz: Írj zenei stílust angolul (pl.: heavy metal guitar beat)!",
+            promptPlaceholder: "Pl.: Úgy viselkedj, mint egy tapasztalt marketinges...",
+            promptPlaceholderImg: "Pl.: A futuristic cybernetic owl perched on a neon branch...",
+            promptPlaceholderAudio: "Pl.: Heavy metal rock music with electric guitar solo...",
+            submitBtn: "Tesztelés és Értékelés",
+            submitBtnImg: "🎨 Kép Generálása",
+            submitBtnAudio: "🎵 Zene Generálása",
+            errPrompt: "Kérlek, írj be egy promptot!",
+            errApiKey: "A szöveges modellek használatához kérlek adj meg egy API kulcsot!",
+            errHfApiKey: "Kérlek, add meg a Hugging Face API kulcsodat az API Kulcs mezőben!",
+            generatingAudioBtn: "🎵 Zene komponálása...",
+            generatingBtn: "🎨 Kép generálása...",
+            modelWarmingUp: "⏳ Az AI modell éppen ébredezik...",
+            waitingSec: "Várakozás: ~",
+            seconds: "másodperc",
+            audioGenSubtext: "(Ez 15-30 másodpercet is igénybe vehet)",
+            checkApiKeyHint: "Ellenőrizd, hogy érvényes-e a Hugging Face API kulcsod!",
+            errPrefix: "⚠️ Hiba történt: ",
+            errInvalidKey: "⚠️ Érvénytelen Hugging Face API kulcs (401 Unauthorized)!",
+            audioTitle: "🎵 Generált Zene (Meta MusicGen)",
+            audioPlaceholderText: "Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!",
+            downloadAudioBtnText: "Zene Letöltése (.wav)",
+            audioFileName: "generalt-zene.wav"
+        },
+        en: {
+            mainTitle: "Prompt Engineer Academy",
+            mainSubtitle: "Learn how to build perfect prompts and test text, image, or music models!",
+            readmeBtnText: "Help / API Keys",
+            readmeModalTitle: "Guide & API Settings",
+            donateBtn: "Support the project",
+            apiKeyLabel: "API Key:",
+            apiKeyHfLabel: "Hugging Face API Key:",
+            modelLabel: "Select Model:",
+            apiNote: "Your key is sent directly to the API and not stored.",
+            apiNoteFree: "NO API key needed! Completely Free.",
+            apiNoteHf: "A free Hugging Face API key is required to run MusicGen.",
+            promptBoxTitle: "Write your prompt here",
+            promptBoxTip: "Tip: Include Role, Context, Task, and Constraints.",
+            promptBoxTipImg: "Tip for images: Write a detailed description in English!",
+            promptBoxTipAudio: "Tip for music: Describe the genre/instruments in English!",
+            promptPlaceholder: "E.g.: Act as an experienced marketer...",
+            promptPlaceholderImg: "E.g.: A futuristic cybernetic owl perched on a neon branch...",
+            promptPlaceholderAudio: "E.g.: Heavy metal rock music with electric guitar solo...",
+            submitBtn: "Test and Evaluate",
+            submitBtnImg: "🎨 Generate Image",
+            submitBtnAudio: "🎵 Generate Music",
+            errPrompt: "Please enter a prompt!",
+            errApiKey: "Please provide an API key for text models!",
+            errHfApiKey: "Please enter your Hugging Face API key in the API Key field!",
+            generatingAudioBtn: "🎵 Generating Music...",
+            generatingBtn: "🎨 Generating Image...",
+            modelWarmingUp: "⏳ The AI model is currently warming up...",
+            waitingSec: "Waiting: ~",
+            seconds: "seconds",
+            audioGenSubtext: "(This may take 15-30 seconds)",
+            checkApiKeyHint: "Please check if your Hugging Face API key is valid!",
+            errPrefix: "⚠️ Error occurred: ",
+            errInvalidKey: "⚠️ Invalid Hugging Face API key (401 Unauthorized)!",
+            audioTitle: "🎵 Generated Music (Meta MusicGen)",
+            audioPlaceholderText: "Describe a music style in English (e.g. heavy metal, synthwave, acoustic guitar), then click generate!",
+            downloadAudioBtnText: "Download Music (.wav)",
+            audioFileName: "ai-generated-music.wav"
+        },
+        de: {
+            mainTitle: "Prompt Engineer Akademie",
+            mainSubtitle: "Lerne die perfekten Prompts zu erstellen und teste Text-, Bild- oder Musik-Modelle!",
+            readmeBtnText: "Hilfe / API-Schlüssel",
+            readmeModalTitle: "Anleitung & API-Einstellungen",
+            donateBtn: "Projekt unterstützen",
+            apiKeyLabel: "API-Schlüssel:",
+            apiKeyHfLabel: "Hugging Face API-Schlüssel:",
+            modelLabel: "Modell auswählen:",
+            apiNote: "Ihr Schlüssel wird direkt an die API gesendet und nicht gespeichert.",
+            apiNoteFree: "KEIN API-Schlüssel erforderlich! Völlig kostenlos.",
+            apiNoteHf: "Für das Ausführen von MusicGen ist ein kostenloser Hugging Face API-Schlüssel erforderlich.",
+            promptBoxTitle: "Geben Sie Ihren Prompt ein",
+            promptBoxTip: "Tipp: Enthält Rolle, Kontext, Aufgabe und Einschränkungen.",
+            promptBoxTipImg: "Tipp für Bilder: Schreiben Sie eine detaillierte Beschreibung auf Englisch!",
+            promptBoxTipAudio: "Tipp für Musik: Beschreiben Sie das Genre/Instrumente auf Englisch!",
+            promptPlaceholder: "z.B.: Agieren Sie als erfahrener Marketer...",
+            promptPlaceholderImg: "z.B.: A futuristic cybernetic owl perched on a neon branch...",
+            promptPlaceholderAudio: "z.B.: Heavy metal rock music with electric guitar solo...",
+            submitBtn: "Testen und Bewerten",
+            submitBtnImg: "🎨 Bild Generieren",
+            submitBtnAudio: "🎵 Musik Generieren",
+            errPrompt: "Bitte geben Sie einen Prompt ein!",
+            errApiKey: "Bitte geben Sie einen API-Schlüssel für Textmodelle ein!",
+            errHfApiKey: "Bitte geben Sie Ihren Hugging Face API-Schlüssel im Feld ein!",
+            generatingAudioBtn: "🎵 Musik wird komponiert...",
+            generatingBtn: "🎨 Bild wird generiert...",
+            modelWarmingUp: "⏳ Das KI-Modell wird gerade gestartet...",
+            waitingSec: "Wartezeit: ~",
+            seconds: "Sekunden",
+            audioGenSubtext: "(Dies kann 15–30 Sekunden dauern)",
+            checkApiKeyHint: "Bitte überprüfen Sie, ob Ihr Hugging Face API-Schlüssel gültig ist!",
+            errPrefix: "⚠️ Fehler aufgetreten: ",
+            errInvalidKey: "⚠️ Ungültiger Hugging Face API-Schlüssel (401 Unauthorized)!",
+            audioTitle: "🎵 Generierte Musik (Meta MusicGen)",
+            audioPlaceholderText: "Beschreiben Sie einen Musikstil auf Englisch (z. B. Heavy Metal, Synthwave, Akustikgitarre) und klicken Sie auf Generieren!",
+            downloadAudioBtnText: "Musik Herunterladen (.wav)",
+            audioFileName: "ki-generierte-musik.wav"
+        },
+        fr: {
+            mainTitle: "Académie de Prompt Engineering",
+            mainSubtitle: "Apprenez à concevoir des prompts parfaits et testez des modèles de texte, d'image ou de musique !",
+            readmeBtnText: "Aide / Clés API",
+            readmeModalTitle: "Guide & Paramètres API",
+            donateBtn: "Soutenir le projet",
+            apiKeyLabel: "Clé API :",
+            apiKeyHfLabel: "Clé API Hugging Face :",
+            modelLabel: "Sélect. Modèle :",
+            apiNote: "Votre clé est envoyée directement à l'API et n'est pas stockée.",
+            apiNoteFree: "AUCUNE clé API requise ! Entièrement gratuit.",
+            apiNoteHf: "Une clé API Hugging Face gratuite est requise pour exécuter MusicGen.",
+            promptBoxTitle: "Écrivez votre prompt ici",
+            promptBoxTip: "Conseil : Incluez le Rôle, le Contexte, la Tâche et les Contraintes.",
+            promptBoxTipImg: "Conseil pour les images : Écrivez une description détaillée en anglais !",
+            promptBoxTipAudio: "Conseil pour la musique : Décrivez le genre/les instruments en anglais !",
+            promptPlaceholder: "Ex : Agissez en tant que marketeur expérimenté...",
+            promptPlaceholderImg: "Ex : A futuristic cybernetic owl perched on a neon branch...",
+            promptPlaceholderAudio: "Ex : Heavy metal rock music with electric guitar solo...",
+            submitBtn: "Tester et Évaluer",
+            submitBtnImg: "🎨 Générer l'Image",
+            submitBtnAudio: "🎵 Générer la Musique",
+            errPrompt: "Veuillez entrer un prompt !",
+            errApiKey: "Veuillez fournir une clé API pour les modèles de texte !",
+            errHfApiKey: "Veuillez saisir votre clé API Hugging Face dans le champ !",
+            generatingAudioBtn: "🎵 Composition de la musique...",
+            generatingBtn: "🎨 Génération de l'image...",
+            modelWarmingUp: "⏳ Le modèle IA est en train de démarrer...",
+            waitingSec: "Attente : ~",
+            seconds: "secondes",
+            audioGenSubtext: "(Cela peut prendre de 15 à 30 secondes)",
+            checkApiKeyHint: "Vérifiez si votre clé API Hugging Face est valide !",
+            errPrefix: "⚠️ Une erreur est survenue : ",
+            errInvalidKey: "⚠️ Clé API Hugging Face non valide (401 Unauthorized)!",
+            audioTitle: "🎵 Musique Générée (Meta MusicGen)",
+            audioPlaceholderText: "Décrivez un style musical en anglais (ex. heavy metal, synthwave, guitare acoustique), puis cliquez sur générer !",
+            downloadAudioBtnText: "Télécharger la musique (.wav)",
+            audioFileName: "musique-generee-ia.wav"
+        },
+        pl: {
+            mainTitle: "Akademia Prompt Engineeringu",
+            mainSubtitle: "Twórz idealne prompty i testuj modele tekstowe, obrazowe i muzyczne!",
+            readmeBtnText: "Pomoc / Klucze API",
+            readmeModalTitle: "Przewodnik i Ustawienia API",
+            donateBtn: "Wesprzyj projekt",
+            apiKeyLabel: "Klucz API:",
+            apiKeyHfLabel: "Klucz API Hugging Face:",
+            modelLabel: "Wybierz model:",
+            apiNote: "Twój klucz jest przesyłany bezpośrednio do API i nie jest zapisywany.",
+            apiNoteFree: "Brak konieczności podawania klucza API! Całkowicie za darmo.",
+            apiNoteHf: "Do uruchomienia MusicGen wymagany jest darmowy klucz API Hugging Face.",
+            promptBoxTitle: "Wpisz swój prompt tutaj",
+            promptBoxTip: "Wskazówka: Uwzględnij Rolę, Kontekst, Zadanie i Ograniczenia.",
+            promptBoxTipImg: "Wskazówka dla obrazów: Wpisz szczegółowy opis po angielsku!",
+            promptBoxTipAudio: "Wskazówka dla muzyki: Opisz gatunek/instrumenty po angielsku!",
+            promptPlaceholder: "Np.: Działaj jako doświadczony marketer...",
+            promptPlaceholderImg: "Np.: A futuristic cybernetic owl perched on a neon branch...",
+            promptPlaceholderAudio: "Np.: Heavy metal rock music with electric guitar solo...",
+            submitBtn: "Testuj i Oceń",
+            submitBtnImg: "🎨 Generuj Obraz",
+            submitBtnAudio: "🎵 Generuj Muzykę",
+            errPrompt: "Proszę wpisać prompt!",
+            errApiKey: "Proszę podać klucz API dla modeli tekstowych!",
+            errHfApiKey: "Proszę podać klucz API Hugging Face w polu klucza!",
+            generatingAudioBtn: "🎵 Tworzenie muzyki...",
+            generatingBtn: "🎨 Generowanie obrazu...",
+            modelWarmingUp: "⏳ Model AI właśnie się uruchamia...",
+            waitingSec: "Czekanie: ~",
+            seconds: "sekund",
+            audioGenSubtext: "(Może to zająć od 15 do 30 sekund)",
+            checkApiKeyHint: "Sprawdź, czy Twój klucz API Hugging Face jest poprawny!",
+            errPrefix: "⚠️ Wystąpił błąd: ",
+            errInvalidKey: "⚠️ Nieprawidłowy klucz API Hugging Face (401 Unauthorized)!",
+            audioTitle: "🎵 Wygenerowana Muzyka (Meta MusicGen)",
+            audioPlaceholderText: "Opisz styl muzyczny po angielsku (np. heavy metal, synthwave, gitara akustyczna), a następnie kliknij generuj!",
+            downloadAudioBtnText: "Pobierz muzykę (.wav)",
+            audioFileName: "wygenerowana-muzyka-ai.wav"
+        }
+    };
+
+    let currentLang = 'hu';
+
+    // MODAL/README KEZELŐ
+    const readmeModal = document.getElementById('readmeModal');
+    const openReadmeBtn = document.getElementById('openReadmeBtn');
+    const closeReadmeBtn = document.getElementById('closeReadmeBtn');
+    const readmeContent = document.getElementById('readmeContent');
+
+    openReadmeBtn.addEventListener('click', async () => {
+        readmeModal.style.display = 'flex';
+        
+        const readmeFileName = currentLang === 'hu' ? './README.md' : `./README_${currentLang}.md`;
+        
+        try {
+            let res = await fetch(readmeFileName);
+            if (!res.ok && currentLang !== 'hu') {
+                res = await fetch('./README.md');
+            }
+            
+            if (res.ok) {
+                const text = await res.text();
+                readmeContent.innerHTML = marked.parse(text);
+            } else {
+                readmeContent.innerHTML = `<p class="text-red-500 font-bold">README file not found.</p>`;
+            }
+        } catch (e) {
+            readmeContent.innerHTML = `<p class="text-red-500 font-bold">Error loading README: ${e.message}</p>`;
+        }
+    });
+
+    closeReadmeBtn.addEventListener('click', () => {
+        readmeModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === readmeModal) {
+            readmeModal.style.display = 'none';
+        }
+    });
+
+    // NYELVVÁLTÁS & MODEL-VÁLTÁS UI
+    function updateUIForSelectedModel() {
+        const t = translations[currentLang] || translations.hu;
+
+        // Statikus elemek fordítása
+        document.getElementById('mainTitle').innerText = t.mainTitle;
+        document.getElementById('mainSubtitle').innerText = t.mainSubtitle;
+        document.getElementById('readmeBtnText').innerText = t.readmeBtnText;
+        document.getElementById('readmeModalTitle').innerText = t.readmeModalTitle;
+        document.getElementById('donateBtn').innerText = t.donateBtn;
+        document.getElementById('modelLabel').innerText = t.modelLabel;
+        document.getElementById('promptBoxTitle').innerText = t.promptBoxTitle;
+
+        // Audio felület dinamikus feliratok
+        document.getElementById('audioTitle').innerText = t.audioTitle;
+        document.getElementById('audioPlaceholderText').innerText = t.audioPlaceholderText;
+        document.getElementById('downloadAudioBtnText').innerText = t.downloadAudioBtnText;
+
+        const selectedModel = document.getElementById("modelSelect").value;
+        const apiKeyContainer = document.getElementById('apiKeyContainer');
+        const apiKeyLabel = document.getElementById('apiKeyLabel');
+        const submitBtn = document.getElementById('submitBtn');
+        const apiNoteText = document.getElementById('apiNoteText');
+        const promptTipText = document.getElementById('promptTipText');
+        const promptInput = document.getElementById('userPrompt');
+
+        const textSection = document.getElementById('textEvalSection');
+        const imageSection = document.getElementById('imageEvalSection');
+        const audioSection = document.getElementById('audioEvalSection');
+        const aiResponseContainer = document.getElementById('aiResponseContainer');
+
+        if (isAudioModel(selectedModel)) {
+            textSection.classList.add('hidden');
+            aiResponseContainer.classList.add('hidden');
+            imageSection.classList.add('hidden');
+            audioSection.classList.remove('hidden');
+
+            apiKeyContainer.style.display = 'block';
+            apiKeyLabel.innerText = t.apiKeyHfLabel;
+            apiNoteText.innerText = t.apiNoteHf;
+            submitBtn.innerText = t.submitBtnAudio;
+            promptTipText.innerText = t.promptBoxTipAudio;
+            promptInput.placeholder = t.promptPlaceholderAudio;
+
+        } else if (isImageModel(selectedModel)) {
+            textSection.classList.add('hidden');
+            aiResponseContainer.classList.add('hidden');
+            audioSection.classList.add('hidden');
+            imageSection.classList.remove('hidden');
+
+            apiKeyContainer.style.display = 'none';
+            apiNoteText.innerText = t.apiNoteFree;
+            submitBtn.innerText = t.submitBtnImg;
+            promptTipText.innerText = t.promptBoxTipImg;
+            promptInput.placeholder = t.promptPlaceholderImg;
+
+        } else {
+            textSection.classList.remove('hidden');
+            aiResponseContainer.classList.remove('hidden');
+            imageSection.classList.add('hidden');
+            audioSection.classList.add('hidden');
+
+            apiKeyContainer.style.display = 'block';
+            apiKeyLabel.innerText = t.apiKeyLabel;
+            apiNoteText.innerText = t.apiNote;
+            submitBtn.innerText = t.submitBtn;
+            promptTipText.innerText = t.promptBoxTip;
+            promptInput.placeholder = t.promptPlaceholder;
+        }
+    }
+
+    document.getElementById('modelSelect').addEventListener('change', updateUIForSelectedModel);
+    document.getElementById('langSelect').addEventListener('change', (e) => {
+        currentLang = e.target.value;
+        updateUIForSelectedModel();
+    });
+
+    // FŐ GOMB KEZELŐ
+    window.handleExecution = async function() {
+        const selectedModel = document.getElementById("modelSelect").value;
+        
+        if (isAudioModel(selectedModel)) {
+            await generateAudioModel();
+            return;
+        } 
+        
+        if (isImageModel(selectedModel)) {
+            await generateImageModel();
+            return;
+        } 
+        
+        await analyzeTextPrompt(selectedModel);
+    };
+
+    // 🎵 ZENEGENERÁLÁS (Hugging Face API)
+    async function generateAudioModel() {
+        const t = translations[currentLang] || translations.hu;
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
+        const audioPlaceholder = document.getElementById('audioPlaceholder');
+        const audioContainer = document.getElementById('audioContainer');
+        const audioElement = document.getElementById('generatedAudio');
+        const downloadBtn = document.getElementById('downloadAudioBtn');
+
+        if (!userPrompt) { alert(t.errPrompt); return; }
+        if (!apiKey) { alert(t.errHfApiKey); return; }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = t.generatingAudioBtn;
+        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 ${t.generatingAudioBtn}<br><span class="text-xs text-gray-400 font-normal">${t.audioGenSubtext}</span></span>`;
+        audioPlaceholder.classList.remove('hidden');
+        audioContainer.classList.add('hidden');
+        downloadBtn.classList.add('hidden');
+
+        async function queryMusicGen(retries = 3) {
+            try {
+                const response = await fetch(
+                    "https://api-inference.huggingface.co/models/facebook/musicgen-small",
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${apiKey}`,
+                            "Content-Type": "application/json",
+                        },
+                        method: "POST",
+                        body: JSON.stringify({ inputs: userPrompt }),
+                    }
+                );
+
+                if (response.status === 401) {
+                    throw new Error(t.errInvalidKey);
+                }
+
+                const result = await response.json().catch(() => null);
+
+                if (response.status === 503 && retries > 0) {
+                    const estimatedTime = result?.estimated_time || 20;
+                    audioPlaceholder.innerHTML = `<span class="animate-pulse text-yellow-400 font-bold">${t.modelWarmingUp}<br><span class="text-xs text-gray-400">${t.waitingSec}${Math.ceil(estimatedTime)} ${t.seconds}</span></span>`;
+                    
+                    await new Promise(resolve => setTimeout(resolve, Math.max(estimatedTime * 1000, 10000)));
+                    return await queryMusicGen(retries - 1);
+                }
+
+                if (!response.ok) {
+                    throw new Error(result?.error || `API Error: ${response.status}`);
+                }
+
+                return await response.blob();
+
+            } catch (err) {
+                throw err;
+            }
+        }
+
+        try {
+            const blob = await queryMusicGen();
+            const audioUrl = URL.createObjectURL(blob);
+
+            audioElement.src = audioUrl;
+            audioPlaceholder.classList.add('hidden');
+            audioContainer.classList.remove('hidden');
+            
+            downloadBtn.href = audioUrl;
+            downloadBtn.download = t.audioFileName;
+            downloadBtn.target = "_blank";
+            downloadBtn.classList.remove('hidden');
+
+            audioElement.play().catch(() => {});
+
+        } catch (error) {
+            console.error("Audio Generation Error:", error);
+            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${error.message}<br><span class="text-xs text-gray-300">${t.checkApiKeyHint}</span></span>`;
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = t.submitBtnAudio;
+        }
+    }
+
+    // 🎨 KÉPGENERÁLÁS
+    async function generateImageModel() {
+        const t = translations[currentLang] || translations.hu;
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
+        const imgElem = document.getElementById('generatedImage');
+        const placeholder = document.getElementById('imagePlaceholder');
+        const downloadBtn = document.getElementById('downloadImgBtn');
+
+        if (!userPrompt) { alert(t.errPrompt); return; }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = t.generatingBtn;
+        placeholder.innerHTML = `<span class="animate-pulse text-xl">🎨 ${t.generatingBtn}</span>`;
+        placeholder.classList.remove('hidden');
+        imgElem.classList.add('hidden');
+        downloadBtn.classList.add('hidden');
+
+        const encodedPrompt = encodeURIComponent(userPrompt);
+        const seed = Math.floor(Math.random() * 1000000);
+        const finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+
+        imgElem.src = finalImageUrl;
+        imgElem.onload = () => {
+            placeholder.classList.add('hidden');
+            imgElem.classList.remove('hidden');
+            downloadBtn.href = finalImageUrl;
+            downloadBtn.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerText = t.submitBtnImg;
+        };
+    }
+
+    // 📝 SZÖVEG ELEMZÉS
+    async function analyzeTextPrompt(selectedModel) {
+        const t = translations[currentLang] || translations.hu;
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+
+        if (!userPrompt) { alert(t.errPrompt); return; }
+        if (!apiKey) { alert(t.errApiKey); return; }
+
+        alert("Szöveg elemzése indítva...");
+    }
+
+    // Kezdő nézet inicializálása
+    updateUIForSelectedModel();
+    </script>
+</body>
+</html>
