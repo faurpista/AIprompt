@@ -361,7 +361,17 @@ body {
             audioTitle: "🎵 Generált Zene (Meta MusicGen)",
             audioPlaceholderText: "Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!",
             downloadAudioBtnText: "Zene Letöltése (.wav)",
-            audioFileName: "generalt-zene.wav"
+            audioFileName: "generalt-zene.wav",
+             evaluating: "⏳ Elemzés folyamatban...",
+    evaluatingLabel: "Elemzés...",
+    evaluatingDesc: "Az AI éppen értékeli a promptot...",
+    evaluatingWait: "Generálás...",
+    evalErrorTitle: "⚠️ Hiba történt",
+    evalErrorDesc: "A kiértékelés megszakadt.",
+    errGroqKey: "Érvénytelen Groq API kulcs (401 Unauthorized)! Ellenőrizd a beillesztést.",
+    errGeminiKey: "Érvénytelen Google Gemini API kulcs!",
+    errNetworkText: "Hálózati/CORS hiba! Győződj meg róla, hogy helyes API kulcsot adtál meg (Groq: gsk_...), és próbáld meg Inkognitó lapon."
+
         },
         en: {
             mainTitle: "Prompt Engineer Academy",
@@ -400,7 +410,17 @@ body {
             audioTitle: "🎵 Generated Music (Meta MusicGen)",
             audioPlaceholderText: "Describe a music style in English (e.g. heavy metal, synthwave, acoustic guitar), then click generate!",
             downloadAudioBtnText: "Download Music (.wav)",
-            audioFileName: "ai-generated-music.wav"
+            audioFileName: "ai-generated-music.wav",
+            evaluating: "⏳ Analyzing prompt...",
+    evaluatingLabel: "Analyzing...",
+    evaluatingDesc: "AI is currently evaluating your prompt...",
+    evaluatingWait: "Generating...",
+    evalErrorTitle: "⚠️ Error occurred",
+    evalErrorDesc: "Evaluation interrupted.",
+    errGroqKey: "Invalid Groq API Key (401 Unauthorized)! Check your paste.",
+    errGeminiKey: "Invalid Google Gemini API Key!",
+    errNetworkText: "Network/CORS error! Ensure valid API key (Groq: gsk_...) and try in Incognito mode."
+
         },
         de: {
             mainTitle: "Prompt Engineer Akademie",
@@ -439,7 +459,17 @@ body {
             audioTitle: "🎵 Generierte Musik (Meta MusicGen)",
             audioPlaceholderText: "Beschreiben Sie einen Musikstil auf Englisch (z. B. Heavy Metal, Synthwave, Akustikgitarre) und klicken Sie auf Generieren!",
             downloadAudioBtnText: "Musik Herunterladen (.wav)",
-            audioFileName: "ki-generierte-musik.wav"
+            audioFileName: "ki-generierte-musik.wav",
+             evaluating: "⏳ Analyse läuft...",
+    evaluatingLabel: "Analyse...",
+    evaluatingDesc: "KI bewertet derzeit Ihren Prompt...",
+    evaluatingWait: "Generierung...",
+    evalErrorTitle: "⚠️ Fehler aufgetreten",
+    evalErrorDesc: "Auswertung abgebrochen.",
+    errGroqKey: "Ungültiger Groq API-Schlüssel (401 Unauthorized)! Überprüfen Sie Ihre Eingabe.",
+    errGeminiKey: "Ungültiger Google Gemini API-Schlüssel!",
+    errNetworkText: "Netzwerk-/CORS-Fehler! Stellen Sie sicher, dass der Schlüssel gültig ist (Groq: gsk_...)."
+
         },
         fr: {
             mainTitle: "Académie de Prompt Engineering",
@@ -478,7 +508,17 @@ body {
             audioTitle: "🎵 Musique Générée (Meta MusicGen)",
             audioPlaceholderText: "Décrivez un style musical en anglais (ex. heavy metal, synthwave, guitare acoustique), puis cliquez sur générer !",
             downloadAudioBtnText: "Télécharger la musique (.wav)",
-            audioFileName: "musique-generee-ia.wav"
+            audioFileName: "musique-generee-ia.wav",
+            evaluating: "⏳ Analyse en cours...",
+    evaluatingLabel: "Analyse...",
+    evaluatingDesc: "L'IA évalue actuellement votre prompt...",
+    evaluatingWait: "Génération...",
+    evalErrorTitle: "⚠️ Une erreur est survenue",
+    evalErrorDesc: "Évaluation interrompue.",
+    errGroqKey: "Clé API Groq invalide (401 Unauthorized) ! Vérifiez la saisie.",
+    errGeminiKey: "Clé API Google Gemini invalide !",
+    errNetworkText: "Erreur réseau/CORS ! Vérifiez la clé API (Groq: gsk_...) et essayez en mode Incognito."
+
         },
         pl: {
             mainTitle: "Akademia Prompt Engineeringu",
@@ -517,7 +557,17 @@ body {
             audioTitle: "🎵 Wygenerowana Muzyka (Meta MusicGen)",
             audioPlaceholderText: "Opisz styl muzyczny po angielsku (np. heavy metal, synthwave, gitara akustyczna), a następnie kliknij generuj!",
             downloadAudioBtnText: "Pobierz muzykę (.wav)",
-            audioFileName: "wygenerowana-muzyka-ai.wav"
+            audioFileName: "wygenerowana-muzyka-ai.wav",
+            evaluating: "⏳ Analizowanie...",
+    evaluatingLabel: "Analizowanie...",
+    evaluatingDesc: "AI ocenia Twój prompt...",
+    evaluatingWait: "Generowanie...",
+    evalErrorTitle: "⚠️ Wystąpił błąd",
+    evalErrorDesc: "Ocena przerwana.",
+    errGroqKey: "Nieprawidłowy klucz API Groq (401 Unauthorized)! Sprawdź wklejony klucz.",
+    errGeminiKey: "Nieprawidłowy klucz API Google Gemini!",
+    errNetworkText: "Błąd sieci/CORS! Upewnij się, że klucz API jest poprawny (Groq: gsk_...) i spróbuj w trybie prywatnym."
+
         }
     };
 
@@ -772,17 +822,156 @@ body {
         };
     }
 
-    // 📝 SZÖVEG ELEMZÉS
-    async function analyzeTextPrompt(selectedModel) {
-        const t = translations[currentLang] || translations.hu;
-        const apiKey = document.getElementById('apiKey').value.trim();
-        const userPrompt = document.getElementById('userPrompt').value.trim();
+    // 📝 SZÖVEG ELEMZÉS (Teljesen többnyelvű Groq & Gemini integráció)
+async function analyzeTextPrompt(selectedModel) {
+    const t = translations[currentLang] || translations.hu;
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const userPrompt = document.getElementById('userPrompt').value.trim();
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // UI elemek
+    const scoreText = document.getElementById('scoreText');
+    const ratingLabel = document.getElementById('ratingLabel');
+    const ratingDesc = document.getElementById('ratingDesc');
+    const feedbackText = document.getElementById('feedbackText');
+    const aiResponse = document.getElementById('aiResponse');
 
-        if (!userPrompt) { alert(t.errPrompt); return; }
-        if (!apiKey) { alert(t.errApiKey); return; }
+    if (!userPrompt) { alert(t.errPrompt); return; }
+    if (!apiKey) { alert(t.errApiKey); return; }
 
-        alert("Szöveg elemzése indítva...");
+    submitBtn.disabled = true;
+    submitBtn.innerText = t.evaluating;
+    ratingLabel.innerText = t.evaluatingLabel;
+    ratingDesc.innerText = t.evaluatingDesc;
+    feedbackText.innerText = t.evaluating;
+    aiResponse.innerText = t.evaluatingWait;
+
+    // Rendszer utasítás dinamikus nyelvválasztással
+    const langNames = { hu: "Hungarian", en: "English", de: "German", fr: "French", pl: "Polish" };
+    const targetLangName = langNames[currentLang] || "Hungarian";
+
+    const systemInstruction = `
+You are a prompt engineering expert evaluator. Analyze the user's prompt based on 4 criteria (0-100% score for each):
+1. Role
+2. Context
+3. Task
+4. Constraints
+
+CRITICAL: You MUST reply strictly with a valid JSON object. No extra markdown, no commentary outside JSON.
+Required JSON Structure:
+{
+  "role": 80,
+  "context": 60,
+  "task": 90,
+  "constraints": 40,
+  "overall": 68,
+  "rating": "Short rating title",
+  "feedback": "Detailed advice on how to improve the prompt",
+  "ai_response": "Sample ideal AI response executing the user's prompt"
+}
+
+IMPORTANT LANGUAGE RULE: All output values ("rating", "feedback", "ai_response") MUST BE WRITTEN IN THE FOLLOWING LANGUAGE: ${targetLangName}.
+`;
+
+    try {
+        let responseText = "";
+
+        // GROQ MODELLEK (llama-3.1-8b-instant, llama-3.3-70b-versatile)
+        if (selectedModel.includes('llama')) {
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: selectedModel,
+                    messages: [
+                        { role: "system", content: systemInstruction },
+                        { role: "user", content: `Prompt to evaluate: "${userPrompt}"` }
+                    ],
+                    temperature: 0.3,
+                    response_format: { type: "json_object" }
+                })
+            });
+
+            if (response.status === 401) {
+                throw new Error(t.errGroqKey);
+            }
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => null);
+                throw new Error(errData?.error?.message || `Groq API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            responseText = data.choices[0].message.content;
+
+        // GEMINI MODELL (gemini-2.5-flash)
+        } else if (selectedModel.includes('gemini')) {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: `${systemInstruction}\n\nUser prompt: "${userPrompt}"` }]
+                    }],
+                    generationConfig: { responseMimeType: "application/json" }
+                })
+            });
+
+            if (response.status === 400 || response.status === 403) {
+                throw new Error(t.errGeminiKey);
+            }
+
+            if (!response.ok) {
+                throw new Error(`Gemini API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            responseText = data.candidates[0].content.parts[0].text;
+        }
+
+        // JSON válasz feldolgozása
+        const evalData = JSON.parse(responseText);
+
+        // UI Frissítése
+        document.getElementById('p-role').innerText = `${evalData.role}%`;
+        document.getElementById('b-role').style.width = `${evalData.role}%`;
+
+        document.getElementById('p-context').innerText = `${evalData.context}%`;
+        document.getElementById('b-context').style.width = `${evalData.context}%`;
+
+        document.getElementById('p-task').innerText = `${evalData.task}%`;
+        document.getElementById('b-task').style.width = `${evalData.task}%`;
+
+        document.getElementById('p-constraints').innerText = `${evalData.constraints}%`;
+        document.getElementById('b-constraints').style.width = `${evalData.constraints}%`;
+
+        scoreText.innerText = `${evalData.overall}%`;
+        ratingLabel.innerText = evalData.rating || "OK";
+        ratingDesc.innerText = "";
+        feedbackText.innerText = evalData.feedback || "";
+        aiResponse.innerText = evalData.ai_response || "";
+
+    } catch (error) {
+        console.error("Text Eval Error:", error);
+        
+        let errMsg = error.message;
+        if (error.name === 'TypeError' || errMsg.includes('Failed to fetch')) {
+            errMsg = t.errNetworkText;
+        }
+
+        ratingLabel.innerText = t.evalErrorTitle;
+        ratingDesc.innerText = t.evalErrorDesc;
+        feedbackText.innerText = errMsg;
+        aiResponse.innerText = "-";
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = t.submitBtn;
     }
+}
+
 
     // Kezdő nézet inicializálása
     updateUIForSelectedModel();
