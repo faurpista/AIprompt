@@ -334,9 +334,8 @@ body {
             e.preventDefault();
         }
     });
-
-    const isImageModel = (model) => model === 'pollinations-image';
-    const isAudioModel = (model) => model === 'pollinations-audio' || model === 'meta-musicgen';
+const isImageModel = (model) => model === 'pollinations-image' || model.includes('huggingface');
+  const isAudioModel = (model) => model === 'pollinations-audio' || model === 'meta-musicgen';
 
     // MULTI-LANGUAGE TRANSLATIONS (HU, EN, DE, FR, PL)
     const translations = {
