@@ -208,6 +208,7 @@ body {
                         </optgroup>
                         <optgroup label="🎨 Képgeneráló Modell (Ingyenes)">
                             <option value="pollinations-image">Pollinations.ai (Ingyenes kép)</option>
+                            <option value="huggingface-flux">Hugging Face (Flux.1 Schnell)</option>
                         </optgroup>
                         <optgroup label="🎵 Zenei Modell (Hugging Face API Kulcs kell)">
                             <option value="meta-musicgen">🎵 Meta MusicGen / Audio</option>
@@ -882,7 +883,7 @@ document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
 
         const encodedPrompt = encodeURIComponent(userPrompt);
         const seed = Math.floor(Math.random() * 1000000);
-        const finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+  /*      const finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
 
         imgElem.src = finalImageUrl;
         imgElem.onload = () => {
@@ -893,6 +894,78 @@ document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
             submitBtn.disabled = false;
             submitBtn.innerText = t.submitBtnImg;
         };
+        */
+                let finalImageUrl = "";
+
+        // ==========================================
+        // 1. HUGGING FACE API HASZNÁLATA
+        // ==========================================
+        if (selectedModel && selectedModel.includes('huggingface')) {
+            // A tokent ideiglenesen bekérheted egy prompt segítségével, 
+            // vagy beállíthatod egy változóban anélkül, hogy bekódolnád:
+            const hfToken = localStorage.getItem('hf_token') || prompt("Kérlek add meg a Hugging Face API tokenedet (hf_...):");
+            
+            if (hfToken) {
+                localStorage.setItem('hf_token', hfToken); // Elmentjük a böngészőben, hogy legközelebb ne kérje újra
+            }
+
+            const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${hfToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ inputs: encodedPrompt })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Hugging Face API hiba: ${response.status}`);
+            }
+
+            // A Hugging Face nyers képadatot (Blob) ad vissza
+            const imageBlob = await response.blob();
+            finalImageUrl = URL.createObjectURL(imageBlob);
+
+        // ==========================================
+        // 2. POLLINATIONS.AI HASZNÁLATA (Alapértelmezett)
+        // ==========================================
+        } else {
+            finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+        }
+
+        // ==========================================
+        // UI FRISSÍTÉSE ÉS KÉP BETÖLTÉSE
+        // ==========================================
+        imgElem.src = finalImageUrl;
+        
+        imgElem.onload = () => {
+            placeholder.classList.add('hidden');
+            imgElem.classList.remove('hidden');
+            
+            // Letöltés gomb beállítása
+            downloadBtn.href = finalImageUrl;
+            
+            // Ha Hugging Face Blob URL-t használunk, érdemes megadni a fájlnevet
+            if (finalImageUrl.startsWith('blob:')) {
+                downloadBtn.setAttribute('download', `generated-image-${seed}.jpg`);
+            } else {
+                downloadBtn.removeAttribute('download');
+            }
+
+            downloadBtn.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerText = t.submitBtnImg;
+        };
+
+        imgElem.onerror = () => {
+            placeholder.classList.remove('hidden');
+            imgElem.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerText = t.submitBtnImg;
+            alert("Hiba történt a kép betöltése során!");
+        };
+
     }
 
     // 📝 SZÖVEG ELEMZÉS (Teljesen többnyelvű Groq & Gemini integráció)
