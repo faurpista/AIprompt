@@ -374,7 +374,12 @@ body {
       secEvaluationTitle: "AI KIÉRTÉKELÉS",
     secEvaluationDesc: "Elemzés és javaslatok a prompt hatékonyságának növelésére.",
     secAiResponseTitle: "HOGYAN VÁLASZOLNA AZ AI?",
-    secAiResponseDesc: "Az AI által generált minta válasz a jelenlegi promptodra."
+    secAiResponseDesc: "Az AI által generált minta válasz a jelenlegi promptodra.",
+    ratingLabelDefault: "Várakozás a promptra...",
+    ratingDescDefault: "Kattints a gombra az elemzéshez.",
+    feedbackTextDefault: "Itt fog megjelenni az AI részletes tanácsa...",
+    aiResponseDefault: "A promptodra adott tényleges AI válasz itt fog megjelenni..."
+        
         
 
         },
@@ -428,7 +433,12 @@ body {
      secEvaluationTitle: "0AI EVALUATION",
     secEvaluationDesc: "Analysis and recommendations to improve prompt efficiency.",
     secAiResponseTitle: "HOW WOULD THE AI RESPOND?",
-    secAiResponseDesc: "Sample AI-generated response based on your current prompt."
+    secAiResponseDesc: "Sample AI-generated response based on your current prompt.",
+     ratingLabelDefault: "Waiting for prompt...",
+    ratingDescDefault: "Click the button to analyze.",
+    feedbackTextDefault: "Detailed AI advice will appear here...",
+    aiResponseDefault: "The actual AI response to your prompt will appear here..."
+       
        
 
         },
@@ -482,7 +492,12 @@ body {
      secEvaluationTitle: "KI-BEWERTUNG",
     secEvaluationDesc: "Analyse und Empfehlungen zur Steigerung der Prompt-Effizienz.",
     secAiResponseTitle: "WIE WÜRDE DIE KI ANTWORTEN?",
-    secAiResponseDesc: "Beispiel einer KI-generierten Antwort basierend auf Ihrem Prompt."
+    secAiResponseDesc: "Beispiel einer KI-generierten Antwort basierend auf Ihrem Prompt.",
+       ratingLabelDefault: "Warten auf Prompt...",     
+      ratingDescDefault: "Klicken Sie auf die Schaltfläche zur Analyse.",
+    feedbackTextDefault: "Ausführliche KI-Ratschläge werden hier angezeigt...",
+    aiResponseDefault: "Die tatsächliche KI-Antwort auf Ihren Prompt wird hier angezeigt..."
+      
        
 
         },
@@ -536,7 +551,12 @@ body {
       secEvaluationTitle: "ÉVALUATION PAR L'IA",
     secEvaluationDesc: "Analyse et recommandations pour améliorer l'efficacité du prompt.",
     secAiResponseTitle: "COMMENT L'IA RÉPONDRAIT-ELLE ?",
-    secAiResponseDesc: "Exemple de réponse générée par l'IA basée sur votre prompt."
+    secAiResponseDesc: "Exemple de réponse générée par l'IA basée sur votre prompt.",
+        ratingLabelDefault: "En attente du prompt...",
+    ratingDescDefault: "Cliquez sur le bouton pour analyser.",
+    feedbackTextDefault: "Les conseils détaillés de l'IA apparaîtront ici...",
+    aiResponseDefault: "La réponse réelle de l'IA à votre prompt apparaîtra ici..."
+     
       
 
         },
@@ -590,7 +610,12 @@ body {
     secEvaluationTitle: "OCENA AI",
     secEvaluationDesc: "Analiza i rekomendacje poprawiające efektywność promptu.",
     secAiResponseTitle: "JAK ODPOWIEDZIAŁOBY AI?",
-    secAiResponseDesc: "Przykładowa odpowiedź wygenerowana przez AI na podstawie Twojego promptu."
+    secAiResponseDesc: "Przykładowa odpowiedź wygenerowana przez AI na podstawie Twojego promptu.",
+      ratingLabelDefault: "Oczekiwanie na prompt...",
+    ratingDescDefault: "Kliknij przycisk, aby przeanalizować.",
+    feedbackTextDefault: "Szczegółowa porada AI pojawi się tutaj...",
+    aiResponseDefault: "Rzeczywista odpowiedź AI na Twój prompt pojawi się tutaj..."
+      
         
 
         }
@@ -643,6 +668,10 @@ document.getElementById('evalTitle').innerText = t.secEvaluationTitle;
     document.getElementById('feedbackTitle').innerText = t.secEvaluationDesc;
     document.getElementById('aiRespTitle').innerText = t.secAiResponseTitle;
     document.getElementById('aiResponse').innerText = t.secAiResponseDesc;
+document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
+    document.getElementById('ratingDesc').innerText = t.ratingDescDefault;
+    document.getElementById('feedbackText').innerText = t.feedbackTextDefault;
+    document.getElementById('aiResponse').innerText = t.aiResponseDefault;
 
         // Statikus elemek fordítása
         document.getElementById('mainTitle').innerText = t.mainTitle;
