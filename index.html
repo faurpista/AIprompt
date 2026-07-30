@@ -1010,9 +1010,35 @@ IMPORTANT LANGUAGE RULE: All output values ("rating", "feedback", "ai_response")
         }
 
         // JSON válasz feldolgozása
-        const evalData = JSON.parse(responseText);
+       // const evalData = JSON.parse(responseText);
+        
 
-        // UI Frissítése
+             // ==========================================
+        // STRAPABÍRÓ JSON TISZTÍTÓ LOGIKA (DeepSeek, Qwen & Llama)
+        // ==========================================
+        let cleanText = responseText.trim();
+
+        // 1. DeepSeek-R1 gondolkodási fázisának (<think>...</think>) eltávolítása
+        if (cleanText.includes('</think>')) {
+            cleanText = cleanText.split('</think>').pop().trim();
+        }
+
+        // 2. Markdown kódblokk (```json ... ```) eltávolítása (Qwen / Llama miatt)
+        if (cleanText.includes('```')) {
+            cleanText = cleanText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        }
+
+        // 3. Kizárólag a legelső '{' és legutolsó '}' közötti JSON objektum megtartása
+        const firstBracket = cleanText.indexOf('{');
+        const lastBracket = cleanText.lastIndexOf('}');
+
+        if (firstBracket !== -1 && lastBracket !== -1) {
+            cleanText = cleanText.substring(firstBracket, lastBracket + 1);
+        }
+
+        // 4. Biztonságos JSON feldolgozás
+        const evalData = JSON.parse(cleanText);
+   // UI Frissítése
         document.getElementById('p-role').innerText = `${evalData.role}%`;
         document.getElementById('b-role').style.width = `${evalData.role}%`;
 
