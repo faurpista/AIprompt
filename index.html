@@ -908,7 +908,7 @@ document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
         let finalImageUrl = "";
   const modelSelect = document.getElementById('modelSelect'); // Cseréld ki a te select elemed ID-jára, ha más!
         const currentModel = modelSelect ? modelSelect.value : (selectedModel || "");
-const promptInput = document.getElementById('userPrompt');
+//const promptInput = document.getElementById('userPrompt');
         const promptText = userPromptInput ? userPromptInput.value.trim() : "";
 
         // ==========================================
@@ -933,7 +933,7 @@ const promptInput = document.getElementById('userPrompt');
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ 
-                    inputs: promptInput.value.trim() // Nyers szöveg átadása
+                    inputs: userPrompt.value.trim() // Nyers szöveg átadása
                 })
             });
 
@@ -955,7 +955,7 @@ const promptInput = document.getElementById('userPrompt');
         // ==========================================
         } else {
             // A magyar ékezetes karakterek és szóközök biztonságos URL formázása
-            const encodedPrompt = encodeURIComponent(promptInput.value.trim());
+            const encodedPrompt = encodeURIComponent(userPrompt.value.trim());
             const seed = Math.floor(Math.random() * 1000000);
             
             finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
