@@ -639,6 +639,10 @@ body {
     // NYELVVÁLTÁS & MODEL-VÁLTÁS UI
     function updateUIForSelectedModel() {
         const t = translations[currentLang] || translations.hu;
+document.getElementById('evalTitle').innerText = t.secEvaluationTitle;
+    document.getElementById('feedbackTitle').innerText = t.secEvaluationDesc;
+    document.getElementById('aiRespTitle').innerText = t.secAiResponseTitle;
+    document.getElementById('aiResponse').innerText = t.secAiResponseDesc;
 
         // Statikus elemek fordítása
         document.getElementById('mainTitle').innerText = t.mainTitle;
