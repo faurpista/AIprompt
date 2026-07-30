@@ -729,13 +729,23 @@ document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
             promptInput.placeholder = t.promptPlaceholderAudio;
 
         } else if (isImageModel(selectedModel)) {
-            textSection.classList.add('hidden');
+                        textSection.classList.add('hidden');
             aiResponseContainer.classList.add('hidden');
             audioSection.classList.add('hidden');
             imageSection.classList.remove('hidden');
 
-            apiKeyContainer.style.display = 'none';
-            apiNoteText.innerText = t.apiNoteFree;
+            // Megvizsgáljuk, hogy Hugging Face modellt választott-e a felhasználó
+            if (selectedModel && selectedModel.includes('huggingface')) {
+                // Megjelenítjük az API kulcs beviteli mezőt
+                apiKeyContainer.style.display = 'block'; 
+                // Frissítjük a megjegyzést, hogy a felhasználó tudja, mit kell beírnia
+                apiNoteText.innerText = "Hugging Face Access Token szükséges (hf_...)";
+            } else {
+                // Pollinations.ai esetén nincs szükség API kulcsra, elrejtjük
+                apiKeyContainer.style.display = 'none';
+                apiNoteText.innerText = t.apiNoteFree;
+            }
+
             submitBtn.innerText = t.submitBtnImg;
             promptTipText.innerText = t.promptBoxTipImg;
             promptInput.placeholder = t.promptPlaceholderImg;
@@ -902,11 +912,14 @@ document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
         if (selectedModel && selectedModel.includes('huggingface')) {
             // A tokent ideiglenesen bekérheted egy prompt segítségével, 
             // vagy beállíthatod egy változóban anélkül, hogy bekódolnád:
-            const hfToken = localStorage.getItem('hf_token') || prompt("Kérlek add meg a Hugging Face API tokenedet (hf_...):");
-            
-            if (hfToken) {
-                localStorage.setItem('hf_token', hfToken); // Elmentjük a böngészőben, hogy legközelebb ne kérje újra
-            }
+            // A generálást végző függvénynél így tudod kiolvasni a tokent az input mezőből:
+const hfToken = document.getElementById('apiKeyInput').value.trim();
+
+if (!hfToken) {
+    alert("Kérlek add meg a Hugging Face API tokenedet az API kulcs mezőben!");
+    return;
+}
+
 
             const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0", {
                 method: "POST",
