@@ -207,8 +207,10 @@ body {
                             <option value="pollinations-image">Pollinations.ai (Ingyenes kép)</option>
                             <option value="huggingface-flux">Hugging Face (Flux.1 Schnell)</option>
                         </optgroup>
-                        <optgroup label="🎵 Zenei Modell (Hugging Face API Kulcs kell)">
-                            <option value="meta-musicgen">🎵 Meta MusicGen / Audio</option>
+                        <optgroup label="🎵 Zenei Modell (Ingyenes)">
+                            <!-- Cseréld ki erre: -->
+                           <option value="pollinations-audio">🎵 Pollinations Audio (Ingyenes Zene/Hang)</option>
+
                         </optgroup>
                     </select>
                 </div>
@@ -692,21 +694,28 @@ body {
         const audioSection = document.getElementById('audioEvalSection');
         const aiResponseContainer = document.getElementById('aiResponseContainer');
 
-        if (isAudioModel(selectedModel)) {
-            textSection.classList.add('hidden');
-            aiResponseContainer.classList.add('hidden');
-            imageSection.classList.add('hidden');
-            audioSection.classList.remove('hidden');
+        // Az updateUIForSelectedModel() függvény belsejében az isAudioModel ág:
+if (isAudioModel(selectedModel)) {
+    if (textSection) textSection.classList.add('hidden');
+    if (aiResponseContainer) aiResponseContainer.classList.add('hidden');
+    if (imageSection) imageSection.classList.add('hidden');
+    if (audioSection) audioSection.classList.remove('hidden');
 
-            apiKeyContainer.style.display = 'block';
-            apiKeyLabel.innerText = t.apiKeyHfLabel;
-            apiNoteText.innerText = t.apiNoteHf;
-            submitBtn.innerText = t.submitBtnAudio;
-            promptTipText.innerText = t.promptBoxTipAudio;
-            promptInput.placeholder = t.promptPlaceholderAudio;
+    // 💡 Ha Pollinations Audio, elrejtjük az API kulcs mezőt!
+    if (selectedModel.includes('pollinations')) {
+        if (apiKeyContainer) apiKeyContainer.style.display = 'none';
+        if (apiNoteText) apiNoteText.innerText = t.apiNoteFree;
+    } else {
+        if (apiKeyContainer) apiKeyContainer.style.display = 'block';
+        if (apiKeyLabel) apiKeyLabel.innerText = t.apiKeyHfLabel;
+        if (apiNoteText) apiNoteText.innerText = t.apiNoteHf;
+    }
 
-        } else if (isImageModel(selectedModel)) {
-            textSection.classList.add('hidden');
+    if (submitBtn) submitBtn.innerText = t.submitBtnAudio;
+    if (promptTipText) promptTipText.innerText = t.promptBoxTipAudio;
+    if (promptInput) promptInput.placeholder = t.promptPlaceholderAudio;
+}
+textSection.classList.add('hidden');
             aiResponseContainer.classList.add('hidden');
             audioSection.classList.add('hidden');
             imageSection.classList.remove('hidden');
