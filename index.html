@@ -909,7 +909,7 @@ document.getElementById('ratingLabel').innerText = t.ratingLabelDefault;
   const modelSelect = document.getElementById('modelSelect'); // Cseréld ki a te select elemed ID-jára, ha más!
         const currentModel = modelSelect ? modelSelect.value : (selectedModel || "");
 const promptInput = document.getElementById('userPrompt');
-        const promptText = userPromptInput ? userPromptInput.value.trim() : "";
+        const promptText = promptInput ? promptInput.value.trim() : "";
 
         // ==========================================
         // 1. HUGGING FACE API (Flux.1 Schnell)
