@@ -872,46 +872,116 @@ async function queryStableAudio(prompt, apiKey) {
                 const result = await response.json().catch(() => null);
 
                 if (response.status === 503 && retries > 0) {
-                    const estimatedTime = result?.estimated_time || 20;
-                    audioPlaceholder.innerHTML = `<span class="animate-pulse text-yellow-400 font-bold">${t.modelWarmingUp}<br><span class="text-xs text-gray-400">${t.waitingSec}${Math.ceil(estimatedTime)} ${t.seconds}</span></span>`;
-                    
-                    await new Promise(resolve => setTimeout(resolve, Math.max(estimatedTime * 1000, 10000)));
-                    return await queryMusicGen(retries - 1);
-                }
-
-                if (!response.ok) {
-                    throw new Error(result?.error || `API Error: ${response.status}`);
-                }
-
-                return await response.blob();
-
-            } catch (err) {
-                throw err;
+    // 🎵 ZENEGENERÁLÁS (Hugging Face API)
+    async function queryStableAudio(prompt, apiKey) {
+        // 1. Job beküldése a queue-ba
+        const submitResponse = await fetch(
+            "https://router.huggingface.co/fal-ai/fal-ai/stable-audio-3/medium/text-to-audio?_subdomain=queue",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ prompt: prompt })
             }
+        );
+
+        if (submitResponse.status === 401 || submitResponse.status === 403) {
+            throw new Error("Érvénytelen Hugging Face API kulcs!");
         }
 
-        try {
-    const audioUrl = await queryStableAudio();
+        const submitResult = await submitResponse.json().catch(() => ({}));
 
-    audioElement.src = audioUrl;
-    audioPlaceholder.classList.add('hidden');
-    audioContainer.classList.remove('hidden');
+        if (!submitResponse.ok) {
+            throw new Error(submitResult.error?.message || submitResult.detail || `API hiba: ${submitResponse.status}`);
+        }
 
-    downloadBtn.href = audioUrl;
-    downloadBtn.download = t.audioFileName;
-    downloadBtn.target = "_blank";
-    downloadBtn.classList.remove('hidden');
+        const statusUrl = submitResult.status_url;
+        const responseUrl = submitResult.response_url;
 
-    audioElement.play().catch(() => {});
+        if (!statusUrl && !responseUrl) {
+            if (submitResult.audio && submitResult.audio.url) {
+                return submitResult.audio.url;
+            }
+            throw new Error("Váratlan válasz: " + JSON.stringify(submitResult));
+        }
 
-} catch (error) {
-    console.error("Audio Generation Error:", error);
-    audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${error.message}<br><span class="text-xs text-gray-300">${t.checkApiKeyHint}</span></span>`;
-} finally {
-    submitBtn.disabled = false;
-    submitBtn.innerText = t.submitBtnAudio;
-}
+        // 2. Polling: állapot ellenőrzése
+        let attempts = 0;
+        while (attempts < 30) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const statusResp = await fetch(statusUrl, {
+                headers: { "Authorization": `Bearer ${apiKey}` }
+            });
+            const statusResult = await statusResp.json().catch(() => ({}));
+
+            if (statusResult.status === "COMPLETED") {
+                const finalResp = await fetch(responseUrl, {
+                    headers: { "Authorization": `Bearer ${apiKey}` }
+                });
+                const finalResult = await finalResp.json().catch(() => ({}));
+
+                if (finalResult.audio && finalResult.audio.url) {
+                    return finalResult.audio.url;
+                }
+                throw new Error("Nincs audio a végeredményben: " + JSON.stringify(finalResult));
+            }
+
+            if (statusResult.status === "FAILED" || statusResult.status === "ERROR") {
+                throw new Error("A generálás sikertelen: " + JSON.stringify(statusResult));
+            }
+
+            attempts++;
+        }
+
+        throw new Error("Időtúllépés — a generálás túl sokáig tartott.");
     }
+
+    async function generateAudioModel() {
+        const t = translations[currentLang] || translations.hu;
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
+        const audioPlaceholder = document.getElementById('audioPlaceholder');
+        const audioContainer = document.getElementById('audioContainer');
+        const audioElement = document.getElementById('generatedAudio');
+        const downloadBtn = document.getElementById('downloadAudioBtn');
+
+        if (!userPrompt) { alert(t.errPrompt); return; }
+        if (!apiKey) { alert(t.errHfApiKey); return; }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = t.generatingAudioBtn;
+        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 ${t.generatingAudioBtn}<br><span class="text-xs text-gray-400 font-normal">${t.audioGenSubtext}</span></span>`;
+        audioPlaceholder.classList.remove('hidden');
+        audioContainer.classList.add('hidden');
+        downloadBtn.classList.add('hidden');
+
+        try {
+            const audioUrl = await queryStableAudio(userPrompt, apiKey);
+
+            audioElement.src = audioUrl;
+            audioPlaceholder.classList.add('hidden');
+            audioContainer.classList.remove('hidden');
+
+            downloadBtn.href = audioUrl;
+            downloadBtn.download = t.audioFileName;
+            downloadBtn.target = "_blank";
+            downloadBtn.classList.remove('hidden');
+
+            audioElement.play().catch(() => {});
+
+        } catch (error) {
+            console.error("Audio Generation Error:", error);
+            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${error.message}<br><span class="text-xs text-gray-300">${t.checkApiKeyHint}</span></span>`;
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = t.submitBtnAudio;
+        }
+    }
+
 
     // 🎨 KÉPGENERÁLÁS
     async function generateImageModel() {
