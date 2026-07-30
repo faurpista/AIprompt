@@ -220,7 +220,7 @@ body {
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
                 <!-- 1. Szöveg értékelő szekció -->
                 <div id="textEvalSection">
-                    <h2 id="evalTitle" class="text-xl font-bold mb-4 text-cyan-400">AI Kiértékelés</h2>
+                    <h2 data-i18n="secEvaluationTitle" id="evalTitle" class="text-xl font-bold mb-4 text-cyan-400">AI Kiértékelés</h2>
                     
                     <div class="flex items-center space-x-4 mb-6">
                         <div class="relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-gray-600" id="scoreCircle">
@@ -252,7 +252,7 @@ body {
                     </div>
 
                     <div class="bg-gray-950 p-4 rounded-lg border border-gray-700 max-h-48 overflow-y-auto">
-                        <h4 id="feedbackTitle" class="text-xs font-bold uppercase text-gray-400 mb-1">Javaslat a javításra:</h4>
+                        <h4 data-i18n="secEvaluationDesc" id="feedbackTitle" class="text-xs font-bold uppercase text-gray-400 mb-1">Javaslat a javításra:</h4>
                         <p id="feedbackText" class="text-sm text-gray-300 italic">Itt fog megjelenni az AI részletes tanácsa...</p>
                     </div>
                 </div>
@@ -305,8 +305,8 @@ body {
 
         <!-- AI Válasz -->
         <div id="aiResponseContainer" class="mt-6 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
-            <h2 id="aiRespTitle" class="text-lg font-bold mb-2 text-emerald-400">Hogyan válaszolna erre az AI?</h2>
-            <div id="aiResponse" class="bg-gray-900 p-4 rounded-lg text-sm text-gray-300 min-h-16 whitespace-pre-line border border-gray-700">
+            <h2 data-i18n="secAiResponseTitle" id="aiRespTitle" class="text-lg font-bold mb-2 text-emerald-400">Hogyan válaszolna erre az AI?</h2>
+            <div data-i18n="secAiResponseDesc" id="aiResponse" class="bg-gray-900 p-4 rounded-lg text-sm text-gray-300 min-h-16 whitespace-pre-line border border-gray-700">
                 A promptodra adott tényleges AI válasz itt fog megjelenni...
             </div>
         </div>
@@ -370,7 +370,12 @@ body {
     evalErrorDesc: "A kiértékelés megszakadt.",
     errGroqKey: "Érvénytelen Groq API kulcs (401 Unauthorized)! Ellenőrizd a beillesztést.",
     errGeminiKey: "Érvénytelen Google Gemini API kulcs!",
-    errNetworkText: "Hálózati/CORS hiba! Győződj meg róla, hogy helyes API kulcsot adtál meg (Groq: gsk_...), és próbáld meg Inkognitó lapon."
+    errNetworkText: "Hálózati/CORS hiba! Győződj meg róla, hogy helyes API kulcsot adtál meg (Groq: gsk_...), és próbáld meg Inkognitó lapon.",
+      secEvaluationTitle: "AI KIÉRTÉKELÉS",
+    secEvaluationDesc: "Elemzés és javaslatok a prompt hatékonyságának növelésére.",
+    secAiResponseTitle: "HOGYAN VÁLASZOLNA AZ AI?",
+    secAiResponseDesc: "Az AI által generált minta válasz a jelenlegi promptodra."
+        
 
         },
         en: {
@@ -419,7 +424,12 @@ body {
     evalErrorDesc: "Evaluation interrupted.",
     errGroqKey: "Invalid Groq API Key (401 Unauthorized)! Check your paste.",
     errGeminiKey: "Invalid Google Gemini API Key!",
-    errNetworkText: "Network/CORS error! Ensure valid API key (Groq: gsk_...) and try in Incognito mode."
+    errNetworkText: "Network/CORS error! Ensure valid API key (Groq: gsk_...) and try in Incognito mode.",
+     secEvaluationTitle: "0AI EVALUATION",
+    secEvaluationDesc: "Analysis and recommendations to improve prompt efficiency.",
+    secAiResponseTitle: "HOW WOULD THE AI RESPOND?",
+    secAiResponseDesc: "Sample AI-generated response based on your current prompt."
+       
 
         },
         de: {
@@ -468,7 +478,12 @@ body {
     evalErrorDesc: "Auswertung abgebrochen.",
     errGroqKey: "Ungültiger Groq API-Schlüssel (401 Unauthorized)! Überprüfen Sie Ihre Eingabe.",
     errGeminiKey: "Ungültiger Google Gemini API-Schlüssel!",
-    errNetworkText: "Netzwerk-/CORS-Fehler! Stellen Sie sicher, dass der Schlüssel gültig ist (Groq: gsk_...)."
+    errNetworkText: "Netzwerk-/CORS-Fehler! Stellen Sie sicher, dass der Schlüssel gültig ist (Groq: gsk_...).",
+     secEvaluationTitle: "KI-BEWERTUNG",
+    secEvaluationDesc: "Analyse und Empfehlungen zur Steigerung der Prompt-Effizienz.",
+    secAiResponseTitle: "WIE WÜRDE DIE KI ANTWORTEN?",
+    secAiResponseDesc: "Beispiel einer KI-generierten Antwort basierend auf Ihrem Prompt."
+       
 
         },
         fr: {
@@ -517,7 +532,12 @@ body {
     evalErrorDesc: "Évaluation interrompue.",
     errGroqKey: "Clé API Groq invalide (401 Unauthorized) ! Vérifiez la saisie.",
     errGeminiKey: "Clé API Google Gemini invalide !",
-    errNetworkText: "Erreur réseau/CORS ! Vérifiez la clé API (Groq: gsk_...) et essayez en mode Incognito."
+    errNetworkText: "Erreur réseau/CORS ! Vérifiez la clé API (Groq: gsk_...) et essayez en mode Incognito.",
+      secEvaluationTitle: "ÉVALUATION PAR L'IA",
+    secEvaluationDesc: "Analyse et recommandations pour améliorer l'efficacité du prompt.",
+    secAiResponseTitle: "COMMENT L'IA RÉPONDRAIT-ELLE ?",
+    secAiResponseDesc: "Exemple de réponse générée par l'IA basée sur votre prompt."
+      
 
         },
         pl: {
@@ -566,7 +586,12 @@ body {
     evalErrorDesc: "Ocena przerwana.",
     errGroqKey: "Nieprawidłowy klucz API Groq (401 Unauthorized)! Sprawdź wklejony klucz.",
     errGeminiKey: "Nieprawidłowy klucz API Google Gemini!",
-    errNetworkText: "Błąd sieci/CORS! Upewnij się, że klucz API jest poprawny (Groq: gsk_...) i spróbuj w trybie prywatnym."
+    errNetworkText: "Błąd sieci/CORS! Upewnij się, że klucz API jest poprawny (Groq: gsk_...) i spróbuj w trybie prywatnym.",
+    secEvaluationTitle: "OCENA AI",
+    secEvaluationDesc: "Analiza i rekomendacje poprawiające efektywność promptu.",
+    secAiResponseTitle: "JAK ODPOWIEDZIAŁOBY AI?",
+    secAiResponseDesc: "Przykładowa odpowiedź wygenerowana przez AI na podstawie Twojego promptu."
+        
 
         }
     };
