@@ -896,41 +896,75 @@ async function generateAudioModel() {
         }
 
         if (statusResult.status === "FAILED" || statusResult.status === "ERROR") {
-            throw new Error("A zene generálása meghiúsult.");
-        }
+async function generateAudioModel() {
+    const lang = (typeof currentLang !== 'undefined') ? currentLang : 'hu';
+    const transObj = (typeof translations !== 'undefined') ? translations : null;
+    const t = (transObj && transObj[lang]) ? transObj[lang] : translations.hu;
 
-        return await pollStatus(statusUrl, responseUrl, key, attempts + 1);
+    const userPromptInput = document.getElementById('userPrompt');
+    const userPrompt = userPromptInput ? userPromptInput.value.trim() : '';
+
+    const submitBtn = document.getElementById('submitBtn');
+    const audioPlaceholder = document.getElementById('audioPlaceholder');
+    const audioContainer = document.getElementById('audioContainer');
+    const audioElement = document.getElementById('generatedAudio');
+    const downloadBtn = document.getElementById('downloadAudioBtn');
+
+    // Itt NEM kell ellenőrizni az API kulcsot, mert teljesen ingyenes!
+    if (!userPrompt) { alert(t.errPrompt); return; }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = t.generatingAudioBtn;
     }
+    if (audioPlaceholder) {
+        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 ${t.generatingAudioBtn}</span>`;
+        audioPlaceholder.classList.remove('hidden');
+    }
+    if (audioContainer) audioContainer.classList.add('hidden');
+    if (downloadBtn) downloadBtn.classList.add('hidden');
 
-    // 4. Fő folyamat futtatása
     try {
-        const audioUrl = await fetchMusicWithRetry(userPrompt, apiKey);
+        // Pollinations audio URL előállítása (seed-del a megismételhetőség elkerülésére)
+        const encodedPrompt = encodeURIComponent(userPrompt);
+        const seed = Math.floor(Math.random() * 1000000);
+        const audioUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio&seed=${seed}`;
 
-        if (audioElement) audioElement.src = audioUrl;
-        if (audioPlaceholder) audioPlaceholder.classList.add('hidden');
-        if (audioContainer) audioContainer.classList.remove('hidden');
+        if (audioElement) {
+            audioElement.src = audioUrl;
 
-        if (downloadBtn) {
-            downloadBtn.href = audioUrl;
-            downloadBtn.download = t.audioFileName;
-            downloadBtn.target = "_blank";
-            downloadBtn.classList.remove('hidden');
+            // Amikor a böngésző betöltötte a hangfájlt
+            audioElement.oncanplaythrough = () => {
+                if (audioPlaceholder) audioPlaceholder.classList.add('hidden');
+                if (audioContainer) audioContainer.classList.remove('hidden');
+
+                if (downloadBtn) {
+                    downloadBtn.href = audioUrl;
+                    downloadBtn.download = t.audioFileName || "generalt-zene.mp3";
+                    downloadBtn.target = "_blank";
+                    downloadBtn.classList.remove('hidden');
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = t.submitBtnAudio;
+                audioElement.play().catch(() => {});
+            };
+
+            audioElement.onerror = () => {
+                throw new Error("A hangfájl betöltése meghiúsult.");
+            };
         }
-
-        if (audioElement) audioElement.play().catch(() => {});
 
     } catch (error) {
-        console.error("Audio Generation Error:", error);
+        console.error("Pollinations Audio Error:", error);
         if (audioPlaceholder) {
-            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${error.message}<br><span class="text-xs text-gray-300">${t.checkApiKeyHint}</span></span>`;
+            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${error.message}</span>`;
         }
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = t.submitBtnAudio;
-        }
+        submitBtn.disabled = false;
+        submitBtn.innerText = t.submitBtnAudio;
     }
 }
+
 
 
     // 🎨 KÉPGENERÁLÁS
