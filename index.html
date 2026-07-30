@@ -333,7 +333,9 @@ body {
     });
 
     const isImageModel = (model) => model === 'pollinations-image' || model.includes('huggingface');
-    const isAudioModel = (model) => model === 'pollinations-audio' || model === 'meta-musicgen';
+    // Így minden olyan modell zeneinek számít, aminek a neve tartalmazza a 'music' vagy 'audio' szót:
+const isAudioModel = (model) => model.includes('audio') || model.includes('musicgen');
+
 
     // MULTI-LANGUAGE TRANSLATIONS
     const translations = {
