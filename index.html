@@ -887,7 +887,7 @@ body {
                        "Authorization": `Bearer ${hfToken}`,
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ inputs: userPrompt })
+                    body: JSON.stringify({ prompt: userPrompt })
                 });
 
                 if (response.status === 401 || response.status === 403) {
