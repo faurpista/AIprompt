@@ -16,9 +16,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module">
-       import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
-       window.GradioClient = Client;
-   </script>
+       import { HfInference } from "https://cdn.jsdelivr.net/npm/@huggingface/inference@2.8.0/+esm";
+       window.HfInference = HfInference;
+    </script>
+
 
 <style>
 body {
@@ -848,55 +849,33 @@ async function generateAudioModel() {
 
         let audioUrl = "";
 
-        // 🟢 1. ÁG: HUGGING FACE GRADIO SPACE (MusicGen - CORS-mentes WebSocket)
-                // 🟢 1. ÁG: HUGGING FACE GRADIO SPACE (Fix 403 App Config Hiba)
-        if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') || selectedModel.includes('bark')) {
-            
-            if (!window.GradioClient) {
-                throw new Error("A Gradio Client könyvtár nem töltődött be a HTML-ből!");
-            }
-
+    // 🟢 1. ÁG: HUGGING FACE OFFICIAL JS SDK
+        if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen')) {
             const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
 
-            // A 403 app config hiba oka: A HF megköveteli az API tokent a Space config olvasásához!
             if (!hfToken) {
-                alert(t.errApiKey || "HuggingFace API token szükséges a MusicGen használatához!");
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = t.submitBtnAudio;
-                }
+                alert(t.errApiKey || "HuggingFace API token szükséges!");
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = t.submitBtnAudio; }
                 return;
             }
 
-            if (audioPlaceholder) {
-                audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Kapcsolódás a MusicGen szerverhez...</span>`;
+            if (!window.HfInference) {
+                throw new Error("Az HfInference SDK nem töltődött be!");
             }
 
-            // Hitelesített kapcsolat a Token átadásával (megelőzi a 403-as hibát)
-            const app = await window.GradioClient.connect("facebook/MusicGen", {
-                hf_token: hfToken
+            const hf = new window.HfInference(hfToken);
+
+            if (audioPlaceholder) {
+                audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Generálás a Hugging Face SDK-val...</span>`;
+            }
+
+            // Hivatalos audio generation / textToAudio hívás
+            const responseBlob = await hf.textToAudio({
+                model: 'facebook/musicgen-small',
+                inputs: userPrompt
             });
 
-            if (audioPlaceholder) {
-                audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása folyamatban (10-30 mp)...</span>`;
-            }
-
-            const result = await app.predict("/predict", [
-                userPrompt, 
-                null
-            ]);
-
-            if (result && result.data && result.data[0]) {
-                const outputData = result.data[0];
-                audioUrl = (typeof outputData === 'object' && outputData.url) ? outputData.url : outputData;
-            }
-
-            if (!audioUrl) {
-                throw new Error("A szerver nem küldött vissza lejátszható hangfájlt.");
-            }
-
-
-        // 🟣 2. ÁG: POLLINATIONS AUDIO (POST / JSON / Base64 - Nincs direct src CORS hiba)
+            audioUrl = URL.createObjectURL(responseBlob);
         } else {
             const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
                 method: "POST",
