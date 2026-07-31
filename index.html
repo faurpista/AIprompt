@@ -856,14 +856,19 @@ async function generateAudioModel() {
 
              let response;
             try {
-                response = await fetch("https://api-inference.huggingface.co/models/facebook/musicgen-small", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${hfToken}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ inputs: userPrompt })
-                });
+                // A CORS proxy átirányítás hozzáadása a Hugging Face URL elé:
+const targetUrl = "https://api-inference.huggingface.co/models/facebook/musicgen-small";
+const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+response = await fetch(proxyUrl, {
+    method: "POST",
+    headers: {
+        "Authorization": `Bearer ${hfToken}`,
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ inputs: userPrompt })
+});
+
             } catch (netErr) {
                 // "Failed to fetch" hiba elkapása
                 throw new Error(lang === 'hu' 
