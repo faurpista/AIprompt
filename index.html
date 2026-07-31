@@ -1109,8 +1109,7 @@ if (selectedModel === 'pollinations-text') {
     // URL kódolás a biztonságos átvitelért
     const encodedPrompt = encodeURIComponent(fullPrompt);
     
-const response = await fetch(
-    "https://musigen-prox.onrender.com/api/generate-text",
+const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-text",
     {
         method: "POST",
         headers: {
