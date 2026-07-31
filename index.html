@@ -1104,36 +1104,30 @@ IMPORTANT LANGUAGE RULE: All output values ("rating", "feedback", "ai_response")
             let responseText = "";
 if (selectedModel === 'pollinations-text') {
     // Összeállítjuk a teljes promptot
-    const fullPrompt = `${systemInstruction}\n\nÉrtékelendő prompt: "${userPrompt}"`;
-    
-    // URL kódolás a biztonságos átvitelért
-    const encodedPrompt = encodeURIComponent(fullPrompt);
-    
-const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-text",
+    const fullPrompt = `${systemInstruction}
+Értékelendő prompt:
+"${userPrompt}"`;
+
+const response = await fetch(
+    "https://musicgen-proxy.onrender.com/api/generate-text",
     {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            prompt: userPrompt
-            /*
-            model: "openai",
-            messages: [
-                {
-                    role: "user",
-                    content: systemInstruction + 
-                    "\n\nPrompt: " + userPrompt
-                    */
-           //     }
-      //      ]
+            prompt: fullPrompt
         })
     }
 );
 
+if (!response.ok) {
+    throw new Error(`Render hiba: ${response.status}`);
+}
+
 const data = await response.json();
 
-responseText = data.choices[0].message.content;
+responseText = data.result;
 } else if (selectedModel.includes('llama') || 
                 selectedModel.includes('deepseek') || 
                 selectedModel.includes('mixtral') || 
