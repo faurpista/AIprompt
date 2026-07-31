@@ -850,6 +850,7 @@ async function generateAudioModel() {
         let audioUrl = "";
 
     // 🟢 1. ÁG: HUGGING FACE OFFICIAL JS SDK
+                // 🟢 1. ÁG: HUGGING FACE OFFICIAL JS SDK (Helyes metódusnévvel)
         if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen')) {
             const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
 
@@ -869,8 +870,8 @@ async function generateAudioModel() {
                 audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Generálás a Hugging Face SDK-val...</span>`;
             }
 
-            // Hivatalos audio generation / textToAudio hívás
-            const responseBlob = await hf.textToAudio({
+            // 💡 A helyes hivatalos metódus a textToSpeech (MusicGen és Bark modellekhez egyaránt)
+            const responseBlob = await hf.textToSpeech({
                 model: 'facebook/musicgen-small',
                 inputs: userPrompt
             });
