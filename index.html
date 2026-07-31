@@ -849,6 +849,7 @@ async function generateAudioModel() {
         let audioUrl = "";
 
         // 🟢 1. ÁG: HUGGING FACE GRADIO SPACE (MusicGen - CORS-mentes WebSocket)
+                // 🟢 1. ÁG: HUGGING FACE GRADIO SPACE (Fix 403 App Config Hiba)
         if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') || selectedModel.includes('bark')) {
             
             if (!window.GradioClient) {
@@ -856,13 +857,25 @@ async function generateAudioModel() {
             }
 
             const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
-            const clientOptions = hfToken ? { hf_token: hfToken } : {};
+
+            // A 403 app config hiba oka: A HF megköveteli az API tokent a Space config olvasásához!
+            if (!hfToken) {
+                alert(t.errApiKey || "HuggingFace API token szükséges a MusicGen használatához!");
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = t.submitBtnAudio;
+                }
+                return;
+            }
 
             if (audioPlaceholder) {
                 audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Kapcsolódás a MusicGen szerverhez...</span>`;
             }
 
-            const app = await window.GradioClient.connect("facebook/MusicGen", clientOptions);
+            // Hitelesített kapcsolat a Token átadásával (megelőzi a 403-as hibát)
+            const app = await window.GradioClient.connect("facebook/MusicGen", {
+                hf_token: hfToken
+            });
 
             if (audioPlaceholder) {
                 audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása folyamatban (10-30 mp)...</span>`;
@@ -881,6 +894,7 @@ async function generateAudioModel() {
             if (!audioUrl) {
                 throw new Error("A szerver nem küldött vissza lejátszható hangfájlt.");
             }
+
 
         // 🟣 2. ÁG: POLLINATIONS AUDIO (POST / JSON / Base64 - Nincs direct src CORS hiba)
         } else {
