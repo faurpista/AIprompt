@@ -857,10 +857,8 @@ async function generateAudioModel() {
              let response;
             try {
                 // A CORS proxy átirányítás hozzáadása a Hugging Face URL elé:
-const targetUrl = "https://api-inference.huggingface.co/models/facebook/musicgen-small";
-const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-
-response = await fetch(proxyUrl, {
+// A 530-as hibát adó musicgen helyett a stabil Bark / Sound Generation modell:
+const response = await fetch("https://api-inference.huggingface.co/models/suno/bark-small", {
     method: "POST",
     headers: {
         "Authorization": `Bearer ${hfToken}`,
@@ -868,6 +866,7 @@ response = await fetch(proxyUrl, {
     },
     body: JSON.stringify({ inputs: userPrompt })
 });
+
 
             } catch (netErr) {
                 // "Failed to fetch" hiba elkapása
@@ -883,6 +882,11 @@ response = await fetch(proxyUrl, {
             if (response.status === 401 || response.status === 403) {
                 throw new Error(t.errApiKey || "Érvénytelen HuggingFace API Kulcs!");
             }
+if (response.status === 530) {
+    throw new Error(lang === 'hu' 
+        ? "A Hugging Face szervere jelenleg nem éri el ezt a zenemodellt (530 Origin Error). Próbáld meg később vagy válassz másik modellt!" 
+        : "Hugging Face model is currently unavailable (530 Origin Error). Please try again later!");
+}
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
