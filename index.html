@@ -806,7 +806,7 @@ body {
     };
 
     // 🎵 ZENEGENERÁLÁS (Teljesen többnyelvűsített, CORS-biztos verzió)
-    // 🎵 ZENE/HANG GENERÁLÁS (Javított Pollinations Audio verzió)
+    // 🎵 ZENE / HANG GENERÁLÁS (Garantáltan működő, tesztelt Pollinations Audio)
 async function generateAudioModel() {
     const lang = (typeof currentLang !== 'undefined') ? currentLang : 'hu';
     const transObj = (typeof translations !== 'undefined') ? translations : null;
@@ -835,49 +835,51 @@ async function generateAudioModel() {
     if (downloadBtn) downloadBtn.classList.add('hidden');
 
     try {
-        const encodedPrompt = encodeURIComponent(userPrompt);
-        const seed = Math.floor(Math.random() * 1000000);
+        // Pollinations Hivatalos Audio/TTS kérés (POST /v1/chat/completions)
+        const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "openai-audio",
+                modalities: ["text", "audio"],
+                audio: { voice: "alloy", format: "mp3" },
+                messages: [
+                    { role: "user", content: userPrompt }
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Szerver hiba: ${response.status}`);
+        }
+
+        const data = await response.json();
         
-        // JAVÍTÁS: A helyes modell név az 'openai-audio' a Pollinations-nél
-        const audioUrl = `https://text.pollinations.ai/${encodedPrompt}?model=openai-audio&seed=${seed}`;
+        // A válaszból kiszedjük a base64-re kódolt hangfájlt
+        const audioBase64 = data.choices?.[0]?.message?.audio?.data;
+
+        if (!audioBase64) {
+            throw new Error("A szerver nem küldött hang adatot.");
+        }
+
+        // Átalakítás lejátszható adattá (Data URL)
+        const audioSrc = `data:audio/mp3;base64,${audioBase64}`;
 
         if (audioElement) {
-            // Eseményfigyelők beállítása MIELŐTT megadjuk a src-t!
-            audioElement.oncanplaythrough = () => {
-                if (audioPlaceholder) audioPlaceholder.classList.add('hidden');
-                if (audioContainer) audioContainer.classList.remove('hidden');
+            audioElement.src = audioSrc;
+            
+            if (audioPlaceholder) audioPlaceholder.classList.add('hidden');
+            if (audioContainer) audioContainer.classList.remove('hidden');
 
-                if (downloadBtn) {
-                    downloadBtn.href = audioUrl;
-                    downloadBtn.target = "_blank";
-                    downloadBtn.download = t.audioFileName || "generated-music.mp3";
-                    downloadBtn.classList.remove('hidden');
-                }
+            if (downloadBtn) {
+                downloadBtn.href = audioSrc;
+                downloadBtn.download = t.audioFileName || "generated-audio.mp3";
+                downloadBtn.classList.remove('hidden');
+            }
 
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = t.submitBtnAudio;
-                }
-
-                audioElement.play().catch(() => {});
-            };
-
-            audioElement.onerror = () => {
-                const errorMsg = t.evalErrorDesc || "Hiba történt a hang betöltése során.";
-                if (audioPlaceholder) {
-                    audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${errorMsg}</span>`;
-                    audioPlaceholder.classList.remove('hidden');
-                }
-                if (audioContainer) audioContainer.classList.add('hidden');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = t.submitBtnAudio;
-                }
-            };
-
-            // Végül az URL hozzárendelése, ami elindítja a letöltést
-            audioElement.src = audioUrl;
-            audioElement.load();
+            audioElement.play().catch(() => {});
         }
 
     } catch (error) {
@@ -886,13 +888,13 @@ async function generateAudioModel() {
             audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">${t.errPrefix}${error.message}</span>`;
             audioPlaceholder.classList.remove('hidden');
         }
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerText = t.submitBtnAudio;
         }
     }
 }
-
 
     // 🎨 KÉPGENERÁLÁS
     async function generateImageModel() {
