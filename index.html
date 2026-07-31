@@ -1001,7 +1001,10 @@ body {
         const aiResponse = document.getElementById('aiResponse');
 
         if (!userPrompt) { alert(t.errPrompt); return; }
-        if (!apiKey) { alert(t.errApiKey); return; }
+        if (selectedModel !== 'pollinations-text' && !apiKey) {
+        alert(t.errApiKey);
+        return;
+    }
 
         submitBtn.disabled = true;
         submitBtn.innerText = t.evaluating;
