@@ -1117,12 +1117,15 @@ const response = await fetch(
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
+            prompt: userPrompt
+            /*
             model: "openai",
             messages: [
                 {
                     role: "user",
                     content: systemInstruction + 
                     "\n\nPrompt: " + userPrompt
+                    */
                 }
             ]
         })
