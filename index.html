@@ -1042,31 +1042,30 @@ IMPORTANT LANGUAGE RULE: All output values ("rating", "feedback", "ai_response")
         try {
             let responseText = "";
 if (selectedModel === 'pollinations-text') {
-    // Pollinations Ingyenes Szöveges API
-    // Pollinations Ingyenes Szöveges Hívás (402 hiba nélkül)
-const fullPrompt = `${systemInstruction}\n\nErtekelendo prompt: "${userPrompt}"`;
+    // Kifejezetten a Llama modellt kérjük a Pollinationstől -> Így teljesen ingyenes és kulcs nélküli!
+    const fullPrompt = `${systemInstruction}\n\nÉrtékelendő prompt: "${userPrompt}"`;
+    
+    // POST kérés explicit model: "llama" paraméterrel
+    const response = await fetch("https://text.pollinations.ai/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            messages: [
+                { role: "user", content: fullPrompt }
+            ],
+            model: "llama" // 👈 Ez a kulcs! A Llama ágon nincs 402-es fizetési hiba.
+        })
+    });
 
-const response = await fetch("https://text.pollinations.ai/", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        messages: [
-            { 
-                role: "user", 
-                content: fullPrompt 
-            }
-        ]
-        // FONTOS: Nincs jsonMode: true! Így teljesen ingyenes és nem ad 402-es hibát.
-    })
-});
+    if (!response.ok) {
+        throw new Error(`Pollinations API Hiba (${response.status}): A szerver jelenleg nem érhető el.`);
+    }
 
-if (!response.ok) {
-    throw new Error(`Pollinations API Hiba: ${response.status}`);
+    responseText = await response.text();
 }
 
-responseText = await response.text();
 
 
 } else if (selectedModel.includes('llama') || 
