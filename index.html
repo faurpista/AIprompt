@@ -854,26 +854,34 @@ async function generateAudioModel() {
                 return;
             }
 
-            const response = await fetch("https://api-inference.huggingface.co/models/facebook/musicgen-small", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${hfToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ inputs: userPrompt })
-            });
+             let response;
+            try {
+                response = await fetch("https://api-inference.huggingface.co/models/facebook/musicgen-small", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${hfToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ inputs: userPrompt })
+                });
+            } catch (netErr) {
+                // "Failed to fetch" hiba elkapása
+                throw new Error(lang === 'hu' 
+                    ? "Hálózati hiba (CORS vagy blokkolt kérés). Ellenőrizd a hirdetésblokkolót vagy a modellt!" 
+                    : "Network error (CORS or blocked request). Check your adblocker or model availability!");
+            }
 
             if (response.status === 503) {
-                throw new Error(lang === 'hu' ? "A modell még ébredezik a szerveren. Próbáld újra 15-20 mp múlva!" : "Model loading on server. Please retry in 20s.");
+                throw new Error(lang === 'hu' ? "A modell még ébredezik a szerveren. Várj 20 másodpercet és próbáld újra!" : "Model loading on server. Please retry in 20s.");
             }
 
             if (response.status === 401 || response.status === 403) {
-                throw new Error(t.errApiKey);
+                throw new Error(t.errApiKey || "Érvénytelen HuggingFace API Kulcs!");
             }
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error || `HF Error: ${response.status}`);
+                throw new Error(errData.error || `Szerver hiba: ${response.status}`);
             }
 
             const audioBlob = await response.blob();
