@@ -878,7 +878,7 @@ async function generateAudioModel() {
                     ? "Hálózati hiba (CORS vagy blokkolt kérés). Ellenőrizd a hirdetésblokkolót vagy a modellt!" 
                     : "Network error (CORS or blocked request). Check your adblocker or model availability!");
             }
-
+if (response) {
             if (response.status === 503) {
                 throw new Error(lang === 'hu' ? "A modell még ébredezik a szerveren. Várj 20 másodpercet és próbáld újra!" : "Model loading on server. Please retry in 20s.");
             }
@@ -899,7 +899,7 @@ if (response.status === 530) {
 
             const audioBlob = await response.blob();
             audioUrl = URL.createObjectURL(audioBlob);
-
+         }
         // 🟣 2. ÁG: POLLINATIONS AUDIO (Ingyenes, API kulcs nélkül)
         } else {
             const encodedPrompt = encodeURIComponent(userPrompt);
