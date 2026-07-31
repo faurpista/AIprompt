@@ -1,4 +1,3 @@
-Íme a kiegészített szöveg, pontosan megtartva az eredeti dokumentáció formátumát, stílusát, ikonhasználatát és struktúráját:
 ​🔑 API Kulcsok Beszerzése (API Key Setup)
 ​Az alkalmazás működéséhez szükség van egy Groq, egy Google Gemini és/vagy egy Hugging Face API kulcsra (tokenre). Mindhárom szolgáltató kínál 100%-ban ingyenes csomagot a használathoz.
 ​1. ⚡ Groq API Key beszerezése (Ingyenes)
