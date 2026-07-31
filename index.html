@@ -1042,29 +1042,27 @@ IMPORTANT LANGUAGE RULE: All output values ("rating", "feedback", "ai_response")
         try {
             let responseText = "";
 if (selectedModel === 'pollinations-text') {
-    // Kifejezetten a Llama modellt kérjük a Pollinationstől -> Így teljesen ingyenes és kulcs nélküli!
+    // Összeállítjuk a teljes promptot
     const fullPrompt = `${systemInstruction}\n\nÉrtékelendő prompt: "${userPrompt}"`;
     
-    // POST kérés explicit model: "llama" paraméterrel
-    const response = await fetch("https://text.pollinations.ai/", {
-        method: "POST",
+    // URL kódolás a biztonságos átvitelért
+    const encodedPrompt = encodeURIComponent(fullPrompt);
+    
+    // A biztosan létező GET végpont explicit Llama modellel és beépített seed-del
+    const apiUrl = `https://text.pollinations.ai/${encodedPrompt}?model=llama&seed=42`;
+
+    const response = await fetch(apiUrl, {
+        method: "GET",
         headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            messages: [
-                { role: "user", content: fullPrompt }
-            ],
-            model: "llama" // 👈 Ez a kulcs! A Llama ágon nincs 402-es fizetési hiba.
-        })
+            "Accept": "text/plain"
+        }
     });
 
     if (!response.ok) {
-        throw new Error(`Pollinations API Hiba (${response.status}): A szerver jelenleg nem érhető el.`);
+        throw new Error(`Pollinations Hiba (${response.status}): A szerver nem válaszolt.`);
     }
 
     responseText = await response.text();
-
 } else if (selectedModel.includes('llama') || 
                 selectedModel.includes('deepseek') || 
                 selectedModel.includes('mixtral') || 
