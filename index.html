@@ -844,24 +844,7 @@ async function generateAudioModel() {
     if (downloadBtn) downloadBtn.classList.add('hidden');
 
     try {
-        let audioUrl = "";
-
-        // 🟢 1. ÁG: HUGGINGFACE MUSICGEN (Felhasználó saját API kulcsával)
-        if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen')) {
-            const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
-
-            if (!hfToken) {
-                alert(t.errApiKey);
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = t.submitBtnAudio;
-                }
-                return;
-            }
-
-             let response;
-            try {
-                
+        
 
         let audioUrl = "";
 
