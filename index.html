@@ -926,34 +926,57 @@ body {
             let audioUrl = "";
 
             if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen')) {
-                const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
+    const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
 
-                if (!hfToken) {
-                    alert(t.errApiKey || "HuggingFace API token szükséges!");
-                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = t.submitBtnAudio; }
-                    return;
-                }
+    if (!hfToken) {
+        alert(t.errApiKey || "HuggingFace API token szükséges!");
+        if (submitBtn) { 
+            submitBtn.disabled = false; 
+            submitBtn.innerText = t.submitBtnAudio; 
+        }
+        return;
+    }
 
-                if (audioPlaceholder) {
-                    audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren...</span>`;
-                }
+    if (audioPlaceholder) {
+        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren...</span>`;
+    }
 
-                const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-audio", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        prompt: userPrompt,
-                        hfToken: hfToken
-                    })
-                });
+    try {
+        const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-audio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                prompt: userPrompt,
+                hfToken: hfToken
+            })
+        });
 
-                if (!response.ok) {
-                    throw new Error(`Szerver hiba: ${response.status}`);
-                }
+        // Ha a válasz nem OK (200-299), beolvassuk a hibaüzenetet JSON-ként
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: "Ismeretlen hiba történt." }));
+            throw new Error(errorData.error || `Szerver hiba: ${response.status}`);
+        }
 
-                const audioBlob = await response.blob();
-                audioUrl = URL.createObjectURL(audioBlob);
-            } else {
+        const audioBlob = await response.blob();
+        audioUrl = URL.createObjectURL(audioBlob);
+
+        // Opcionális: Audió elem frissítése/megjelenítése a felületen
+        if (audioPlaceholder) {
+            audioPlaceholder.innerHTML = `<audio controls src="${audioUrl}" class="w-full mt-2"></audio>`;
+        }
+
+    } catch (err) {
+        console.error("Generálási hiba:", err);
+        if (audioPlaceholder) {
+            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">❌ Hiba: ${err.message}</span>`;
+        }
+    } finally {
+        if (submitBtn) { 
+            submitBtn.disabled = false; 
+            submitBtn.innerText = t.submitBtnAudio; 
+        }
+    }
+} else {
                 const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
