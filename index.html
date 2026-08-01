@@ -960,26 +960,34 @@ body {
     }
 */
     try {
+    const audioPlaceholder = document.getElementById("audioPlaceholder");
+
+    if (audioPlaceholder) {
+        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a DeepInfra-val...</span>`;
+    }
+
+    try {
         const response = await fetch("https://musicgen-proxy.onrender.com/api/p/generate-audio", {
             method: "POST",
             headers: { 
                 "Content-Type": "application/json" 
             },
             body: JSON.stringify({
-                prompt: userPrompt
+                prompt: userPrompt,
+                apiKey: userApiKey // Opcionális, ha a backendben környezeti változóban tárolod
             })
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: "Szerver hiba" }));
-            throw new Error(errorData.error || `Hiba: ${response.status}`);
+            const errorData = await response.json().catch(() => ({ error: "Ismeretlen hiba történt." }));
+            throw new Error(errorData.error || `Szerver hiba: ${response.status}`);
         }
 
-        // Miután a szerver visszaküldte az audió puffert, Blob-bá alakítjuk
+        // A szerver bináris hangfájlt küld vissza -> Blob-bá alakítjuk
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        // Megjelenítjük a lejátszót
+        // Lejátszó megjelenítése
         if (audioPlaceholder) {
             audioPlaceholder.innerHTML = `
                 <audio controls autoplay src="${audioUrl}" class="w-full mt-2"></audio>
@@ -987,9 +995,9 @@ body {
         }
 
     } catch (err) {
-        console.error("Kliens hiba:", err);
+        console.error("Generálási hiba:", err);
         if (audioPlaceholder) {
-            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">❌ Hiba történt: ${err.message}</span>`;
+            audioPlaceholder.innerHTML = `<span class="text-red-400 font-bold">❌ Hiba: ${err.message}</span>`;
         }
     }
         }
