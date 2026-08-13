@@ -947,6 +947,19 @@ faq5A: "You can test text models (GPT, Llama, Gemini, DeepSeek), image generator
     paramSlider.addEventListener('input', (e) => {
         paramValueDisplay.innerText = e.target.value;
     });
+/**
+ * Biztonságos szöveg- és HTML-beállító segédfüggvény.
+ * Megakadályozza, hogy a hiányzó ID-k miatt összeomoljon a JavaScript.
+ * 
+ * @param {string} id - A HTML elem ID-ja
+ * @param {string} htmlContent - A beállítandó szöveg vagy HTML tartalom
+ */
+function setTxt(id, htmlContent) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.innerHTML = htmlContent;
+    }
+}
 
     // NYELVVÁLTÁS & MODEL-VÁLTÁS UI
     function updateUIForSelectedModel() {
@@ -979,6 +992,19 @@ faq5A: "You can test text models (GPT, Llama, Gemini, DeepSeek), image generator
         document.getElementById('ratingDesc').innerText = t.ratingWaitDesc;
         document.getElementById('feedbackText').innerText = t.feedbackDefault;
         document.getElementById('aiResponse').innerText = t.aiResponseDefault;
+    // GYIK szekció fordítások frissítése
+    setTxt('faqTitle', t.faqTitle);
+    setTxt('faqSubtitle', t.faqSubtitle);
+    setTxt('faq1Q', t.faq1Q);
+    setTxt('faq1A', t.faq1A);
+    setTxt('faq2Q', t.faq2Q);
+    setTxt('faq2A', t.faq2A);
+    setTxt('faq3Q', t.faq3Q);
+    setTxt('faq3A', t.faq3A);
+    setTxt('faq4Q', t.faq4Q);
+    setTxt('faq4A', t.faq4A);
+    setTxt('faq5Q', t.faq5Q);
+    setTxt('faq5A', t.faq5A);
 
         // Kép és Zene panel szövegek
         document.getElementById('generatedImgTitle').innerText = t.generatedImgTitle;
