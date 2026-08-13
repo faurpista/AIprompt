@@ -437,13 +437,14 @@ body {
             </div>
         </section>
         <!-- SEO & HTML GYIK SZEKCIÓ -->
+<!-- SEO & HTML GYIK SZEKCIÓ (Többnyelvű) -->
 <section id="faqSection" class="mt-12 bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-700 shadow-xl">
     <div class="mb-8 text-center md:text-left">
-        <h2 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
-            Gyakran Ismételt Kérdések (GYIK)
+        <h2 id="faqTitle" class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+            <!-- Dinamikus -->
         </h2>
-        <p class="text-gray-400 text-sm md:text-base">
-            Minden, amit az AI prompt értékelésről, a prompt engineeringről és a modellek használatáról tudni érdemes.
+        <p id="faqSubtitle" class="text-gray-400 text-sm md:text-base">
+            <!-- Dinamikus -->
         </p>
     </div>
 
@@ -451,59 +452,60 @@ body {
         <!-- 1. Kérdés -->
         <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
             <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
-                <span>Mi az az AI Prompt Értékelő és hogyan működik?</span>
+                <span id="faq1Q"></span>
                 <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
             </summary>
-            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
-                Az AI Prompt Értékelő egy ingyenes online eszköz, amely a <strong>Prompt Engineering (prompt mérnökség)</strong> legjobb gyakorlatai alapján elemzi a szöveges utasításaidat. A kód 4 fő szempontot vizsgál: <em>Szerepkör (Role)</em>, <em>Kontextus (Context)</em>, <em>Feladat (Task)</em> és <em>Korlátozások (Constraints)</em>. Az elemzés végén százalékos értékelést és konkrét javítási javaslatokat kapsz.
+            <p id="faq1A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <!-- Dinamikus -->
             </p>
         </details>
 
         <!-- 2. Kérdés -->
         <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
             <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
-                <span>Kötelező API kulcsot megadni az eszköz használatához?</span>
+                <span id="faq2Q"></span>
                 <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
             </summary>
-            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
-                <strong>Nem feltétlenül!</strong> Az alkalmazás tartalmaz teljesen ingyenes, API kulcs nélkül is működő modelleket (például a <em>Pollinations AI</em> szöveg-, kép- és zenegeneráló modelljeit). Ha a saját Groq, Google Gemini vagy Hugging Face kulcsodat adod meg, az csak a saját fiókod kvótáját használja.
+            <p id="faq2A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <!-- Dinamikus -->
             </p>
         </details>
 
         <!-- 3. Kérdés -->
         <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
             <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
-                <span>Biztonságban vannak a megadott API kulcsaim?</span>
+                <span id="faq3Q"></span>
                 <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
             </summary>
-            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
-                <strong>Igen, teljes mértékben.</strong> Az alkalmazás nem tárolja el a kulcsaidat semmilyen adatbázisban vagy szerveren. A megadott API kulcs közvetlenül a böngésződből kommunikál a kiválasztott AI szolgáltatóval (Groq, Google, Hugging Face) HTTPS kapcsolaton keresztül.
+            <p id="faq3A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <!-- Dinamikus -->
             </p>
         </details>
 
         <!-- 4. Kérdés -->
         <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
             <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
-                <span>Mit jelent a Temperature (Kreativitás) és a Guidance Scale (CFG)?</span>
+                <span id="faq4Q"></span>
                 <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
             </summary>
-            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
-                A <strong>Temperature</strong> (szöveges modelleknél) a válaszok kiszámíthatóságát szabályozza: alacsony értéknél (0.1–0.3) pontos és tényalapú, míg magas értéknél (0.7–1.0) kreatívabb válaszokat kapsz. A <strong>Guidance Scale / CFG</strong> (képgenerálásnál) határozza meg, hogy a modell mennyire ragaszkodjon szigorúan a leírt prompt szövegéhez.
+            <p id="faq4A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <!-- Dinamikus -->
             </p>
         </details>
 
         <!-- 5. Kérdés -->
         <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
             <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
-                <span>Milyen AI modelleket tesztelhetek az oldalon?</span>
+                <span id="faq5Q"></span>
                 <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
             </summary>
-            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
-                Az eszközzel tesztelhetsz **szöveges modelleket** (ChatGPT/GPT OSS, Llama 3.3, Gemini 2.5, DeepSeek R1, Qwen), **képgenerálókat** (Pollinations Image, Flux.1 Schnell), valamint **zene- és hanggenerálókat** is (Pollinations Audio, Meta MusicGen).
+            <p id="faq5A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <!-- Dinamikus -->
             </p>
         </details>
     </div>
 </section>
+
 
     </main>
 
@@ -578,7 +580,20 @@ body {
             paramTextTitle: "Kreativitás (Temperature):",
             paramTextDesc: "Alacsony érték (0.1 - 0.3): Megfontolt, kiszámítható és tényalapú válaszok. Magas érték (0.7 - 1.0): Kreatív, változatos, szokatlanabb megoldások.",
             paramImageTitle: "Prompt Követés (Guidance Scale / CFG):",
-            paramImageDesc: "Alacsony érték: Nagyobb művészi szabadság az AI-nak. Magas érték: Szigorúan a leírt prompthoz való ragaszkodás."
+            paramImageDesc: "Alacsony érték: Nagyobb művészi szabadság az AI-nak. Magas érték: Szigorúan a leírt prompthoz való ragaszkodás.",
+            faqTitle: "Gyakran Ismételt Kérdések (GYIK)",
+faqSubtitle: "Minden, amit az AI prompt értékelésről, a prompt engineeringről és a modellek használatáról tudni érdemes.",
+faq1Q: "Mi az az AI Prompt Értékelő és hogyan működik?",
+faq1A: "Az AI Prompt Értékelő egy ingyenes online eszköz, amely a Prompt Engineering legjobb gyakorlatai alapján elemzi a szöveges utasításaidat. A kód 4 fő szempontot vizsgál: Szerepkör, Kontextus, Feladat és Korlátozások.",
+faq2Q: "Kötelező API kulcsot megadni az eszköz használatához?",
+faq2A: "Nem feltétlenül! Az alkalmazás tartalmaz teljesen ingyenes, API kulcs nélkül is működő modelleket (pl. Pollinations AI). A saját kulcsod csak a saját fiókod kvótáját használja.",
+faq3Q: "Biztonságban vannak a megadott API kulcsaim?",
+faq3A: "Igen, teljes mértékben. Az alkalmazás nem tárolja el a kulcsaidat; azok közvetlenül a böngészödből kommunikálnak a szolgáltatóval HTTPS-en keresztül.",
+faq4Q: "Mit jelent a Temperature és a Guidance Scale?",
+faq4A: "A Temperature a szöveges válaszok kreativitását és kiszámíthatóságát szabályozza, míg a Guidance Scale a képgenerálásnál határozza meg, hogy a modell mennyire kövesse a promptot.",
+faq5Q: "Milyen AI modelleket tesztelhetek az oldalon?",
+faq5A: "Tesztelhetsz szöveges modelleket (GPT, Llama, Gemini, DeepSeek), képgenerálókat (Flux), valamint zene- és hanggenerálókat is."
+
         },
         en: {
             mainTitle: "AI Prompt Evaluator & Optimizer",
@@ -640,7 +655,20 @@ body {
             paramTextTitle: "Creativity (Temperature):",
             paramTextDesc: "Low (0.1 - 0.3): Precise, deterministic answers. High (0.7 - 1.0): Creative and diverse responses.",
             paramImageTitle: "Prompt Adherence (Guidance Scale / CFG):",
-            paramImageDesc: "Low: More artistic freedom for AI. High: Strict adherence to your written prompt."
+            paramImageDesc: "Low: More artistic freedom for AI. High: Strict adherence to your written prompt.",
+            faqTitle: "Frequently Asked Questions (FAQ)",
+faqSubtitle: "Everything you need to know about AI prompt evaluation, prompt engineering, and using the models.",
+faq1Q: "What is the AI Prompt Evaluator and how does it work?",
+faq1A: "The AI Prompt Evaluator is a free online tool that analyzes your text prompts based on Prompt Engineering best practices. It checks 4 main criteria: Role, Context, Task, and Constraints.",
+faq2Q: "Is it mandatory to provide an API key to use the tool?",
+faq2A: "Not necessarily! The app includes completely free models that work without an API key (e.g., Pollinations AI). Your own key only uses your personal account quota.",
+faq3Q: "Are my API keys safe?",
+faq3A: "Yes, completely. The application does not store your keys; they communicate directly from your browser to the provider via HTTPS.",
+faq4Q: "What do Temperature and Guidance Scale mean?",
+faq4A: "Temperature controls the creativity and predictability of text responses, while Guidance Scale determines how strictly image models follow the prompt.",
+faq5Q: "What AI models can I test on the site?",
+faq5A: "You can test text models (GPT, Llama, Gemini, DeepSeek), image generators (Flux), and music/audio generators."
+
         },
         de: {
             mainTitle: "KI-Prompt-Bewertung & Optimierer",
@@ -702,7 +730,23 @@ body {
             paramTextTitle: "Kreativität (Temperature):",
             paramTextDesc: "Niedrig (0.1 - 0.3): Präzise Antworten. Hoch (0.7 - 1.0): Kreative Ergebnisse.",
             paramImageTitle: "Prompt-Fokussierung (Guidance Scale):",
-            paramImageDesc: "Niedrig: Mehr künstlerische Freiheit. Hoch: Strikte Einhaltung des Prompts."
+            paramImageDesc: "Niedrig: Mehr künstlerische Freiheit. Hoch: Strikte Einhaltung des Prompts.",
+            
+    // ... (a meglévő német fordítások alá vagy közé)
+    faqTitle: "Häufig gestellte Fragen (FAQ)",
+    faqSubtitle: "Alles, was Sie über AI-Prompt-Evaluierung, Prompt Engineering und die Nutzung der Modelle wissen müssen.",
+    faq1Q: "Was ist der AI Prompt Evaluator und wie funktioniert er?",
+    faq1A: "Der AI Prompt Evaluator ist ein kostenloses Online-Tool, das Ihre Text-Prompts basierend auf Best Practices des Prompt Engineering analysiert. Es prüft 4 Hauptkriterien: Rolle (Role), Kontext (Context), Aufgabe (Task) und Einschränkungen (Constraints).",
+    faq2Q: "Ist es obligatorisch, einen API-Schlüssel anzugeben, um das Tool zu nutzen?",
+    faq2A: "Nicht unbedingt! Die App enthält völlig kostenlose Modelle, die auch ohne API-Schlüssel funktionieren (z. B. Pollinations AI). Ihr eigener Schlüssel nutzt lediglich das Kontingent Ihres persönlichen Kontos.",
+    faq3Q: "Sind meine API-Schlüssel sicher?",
+    faq3A: "Ja, absolut. Die Anwendung speichert Ihre Schlüssel nicht; sie kommunizieren direkt von Ihrem Browser aus über HTTPS mit dem Anbieter.",
+    faq4Q: "Was bedeuten Temperature und Guidance Scale?",
+    faq4A: "Temperature steuert die Kreativität und Vorhersehbarkeit von Textantworten, während Guidance Scale bei der Bildgenerierung bestimmt, wie streng das Modell dem Prompt folgt.",
+    faq5Q: "Welche KI-Modelle kann ich auf der Website testen?",
+    faq5A: "Sie können Textmodelle (GPT, Llama, Gemini, DeepSeek), Bildgeneratoren (Flux) sowie Musik- und Audiogeneratoren testen."
+
+
         },
         fr: {
             mainTitle: "Évaluateur & Optimiseur de Prompt IA",
@@ -764,7 +808,23 @@ body {
             paramTextTitle: "Créativité (Température) :",
             paramTextDesc: "Faible (0.1 - 0.3) : Réponses factuelles. Élevée (0.7 - 1.0) : Réponses créatives.",
             paramImageTitle: "Respect du prompt (Guidance Scale) :",
-            paramImageDesc: "Faible : Liberté artistique. Élevée : Respect strict du texte."
+            paramImageDesc: "Faible : Liberté artistique. Élevée : Respect strict du texte.",
+            
+    // ... (a meglévő francia fordítások alá vagy közé)
+    faqTitle: "Foire Aux Questions (FAQ)",
+    faqSubtitle: "Tout ce que vous devez savoir sur l'évaluation des prompts IA, le prompt engineering et l'utilisation des modèles.",
+    faq1Q: "Qu'est-ce que l'Évaluateur de Prompts IA et comment ça fonctionne ?",
+    faq1A: "L'Évaluateur de Prompts IA est un outil en ligne gratuit qui analyse vos instructions textuelles selon les meilleures pratiques du prompt engineering. Il vérifie 4 critères principaux : Rôle, Contexte, Tâche et Contraintes.",
+    faq2Q: "Est-il obligatoire de fournir une clé API pour utiliser l'outil ?",
+    faq2A: "Pas nécessairement ! L'application intègre des modèles entièrement gratuits qui fonctionnent sans clé API (ex. Pollinations AI). Votre propre clé utilise uniquement le quota de votre compte personnel.",
+    faq3Q: "Mes clés API sont-elles en sécurité ?",
+    faq3A: "Oui, tout à fait. L'application ne stocke pas vos clés ; elles communiquent directement depuis votre navigateur vers le fournisseur via HTTPS.",
+    faq4Q: "Que signifient la Température et l'Échelle de Guidage (Guidance Scale) ?",
+    faq4A: "La température contrôle la créativité et la prédictibilité des réponses textuelles, tandis que l'échelle de guidage détermine à quel point les modèles d'images suivent strictement le prompt.",
+    faq5Q: "Quels modèles d'IA puis-je tester sur le site ?",
+    faq5A: "Vous pouvez tester des modèles de texte (GPT, Llama, Gemini, DeepSeek), des générateurs d'images (Flux) ainsi que des générateurs de musique et d'audio."
+
+
         },
         pl: {
             mainTitle: "Evaluator i Optymalizator Promptów AI",
@@ -826,7 +886,20 @@ body {
             paramTextTitle: "Kreatywność (Temperature):",
             paramTextDesc: "Niska (0.1 - 0.3): Precyzyjne odpowiedzi. Wysoka (0.7 - 1.0): Bardziej kreatywne wyniki.",
             paramImageTitle: "Zgodność z promptem (Guidance Scale):",
-            paramImageDesc: "Niska: Większa swoboda artystyczna. Wysoka: Ścisłe trzymanie się promptu."
+            paramImageDesc: "Niska: Większa swoboda artystyczna. Wysoka: Ścisłe trzymanie się promptu.",
+            faqTitle: "Często Zadawane Pytania (FAQ)",
+    faqSubtitle: "Wszystko, co musisz wiedzieć o ocenie promptów AI, inżynierii promptów (prompt engineering) i korzystaniu z modeli.",
+    faq1Q: "Czym jest Ewaluator Promptów AI i jak działa?",
+    faq1A: "Ewaluator Promptów AI to darmowe narzędzie online, które analizuje Twoje instrukcje tekstowe w oparciu o najlepsze praktyki inżynierii promptów. Sprawdza 4 główne kryteria: Rolę, Kontekst, Zadanie i Ograniczenia.",
+    faq2Q: "Czy podanie klucza API jest obowiązkowe, aby korzystać z narzędzia?",
+    faq2A: "Niekoniecznie! Aplikacja zawiera całkowicie darmowe modele, które działają bez klucza API (np. Pollinations AI). Twój własny klucz zużywa jedynie limit Twojego osobistego konta.",
+    faq3Q: "Czy moje klucze API są bezpieczne?",
+    faq3A: "Tak, w pełni. Aplikacja nie przechowuje Twoich kluczy; komunikują się one bezpośrednio z Twojej przeglądarki z dostawcą przez protokół HTTPS.",
+    faq4Q: "Co oznacza Temperature (Temperatura) i Guidance Scale (Skala wskazówek)?",
+    faq4A: "Temperatura kontroluje kreatywność i przewidywalność odpowiedzi tekstowych, podczas gdy skala wskazówek określa, jak ściśle model obrazu trzyma się promptu.",
+    faq5Q: "Jakie modele AI mogę przetestować na stronie?",
+    faq5A: "Możesz testować modele tekstowe (GPT, Llama, Gemini, DeepSeek), generatory obrazów (Flux) oraz generatory muzyki i dźwięku."
+
         }
     };
 
