@@ -450,6 +450,75 @@ body {
                 A promptodra adott tényleges AI válasz itt fog megjelenni...
             </div>
         </section>
+        <!-- SEO & HTML GYIK SZEKCIÓ -->
+<section id="faqSection" class="mt-12 bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-700 shadow-xl">
+    <div class="mb-8 text-center md:text-left">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+            Gyakran Ismételt Kérdések (GYIK)
+        </h2>
+        <p class="text-gray-400 text-sm md:text-base">
+            Minden, amit az AI prompt értékelésről, a prompt engineeringről és a modellek használatáról tudni érdemes.
+        </p>
+    </div>
+
+    <div class="space-y-4">
+        <!-- 1. Kérdés -->
+        <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                <span>Mi az az AI Prompt Értékelő és hogyan működik?</span>
+                <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+            </summary>
+            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                Az AI Prompt Értékelő egy ingyenes online eszköz, amely a <strong>Prompt Engineering (prompt mérnökség)</strong> legjobb gyakorlatai alapján elemzi a szöveges utasításaidat. A kód 4 fő szempontot vizsgál: <em>Szerepkör (Role)</em>, <em>Kontextus (Context)</em>, <em>Feladat (Task)</em> és <em>Korlátozások (Constraints)</em>. Az elemzés végén százalékos értékelést és konkrét javítási javaslatokat kapsz.
+            </p>
+        </details>
+
+        <!-- 2. Kérdés -->
+        <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                <span>Kötelező API kulcsot megadni az eszköz használatához?</span>
+                <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+            </summary>
+            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <strong>Nem feltétlenül!</strong> Az alkalmazás tartalmaz teljesen ingyenes, API kulcs nélkül is működő modelleket (például a <em>Pollinations AI</em> szöveg-, kép- és zenegeneráló modelljeit). Ha a saját Groq, Google Gemini vagy Hugging Face kulcsodat adod meg, az csak a saját fiókod kvótáját használja.
+            </p>
+        </details>
+
+        <!-- 3. Kérdés -->
+        <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                <span>Biztonságban vannak a megadott API kulcsaim?</span>
+                <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+            </summary>
+            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                <strong>Igen, teljes mértékben.</strong> Az alkalmazás nem tárolja el a kulcsaidat semmilyen adatbázisban vagy szerveren. A megadott API kulcs közvetlenül a böngésződből kommunikál a kiválasztott AI szolgáltatóval (Groq, Google, Hugging Face) HTTPS kapcsolaton keresztül.
+            </p>
+        </details>
+
+        <!-- 4. Kérdés -->
+        <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                <span>Mit jelent a Temperature (Kreativitás) és a Guidance Scale (CFG)?</span>
+                <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+            </summary>
+            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                A <strong>Temperature</strong> (szöveges modelleknél) a válaszok kiszámíthatóságát szabályozza: alacsony értéknél (0.1–0.3) pontos és tényalapú, míg magas értéknél (0.7–1.0) kreatívabb válaszokat kapsz. A <strong>Guidance Scale / CFG</strong> (képgenerálásnál) határozza meg, hogy a modell mennyire ragaszkodjon szigorúan a leírt prompt szövegéhez.
+            </p>
+        </details>
+
+        <!-- 5. Kérdés -->
+        <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                <span>Milyen AI modelleket tesztelhetek az oldalon?</span>
+                <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+            </summary>
+            <p class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3">
+                Az eszközzel tesztelhetsz **szöveges modelleket** (ChatGPT/GPT OSS, Llama 3.3, Gemini 2.5, DeepSeek R1, Qwen), **képgenerálókat** (Pollinations Image, Flux.1 Schnell), valamint **zene- és hanggenerálókat** is (Pollinations Audio, Meta MusicGen).
+            </p>
+        </details>
+    </div>
+</section>
+
     </main>
 
     <script>
@@ -1199,6 +1268,8 @@ body {
             }
 
             imgElem.src = finalImageUrl;
+// A generateImageModel() függvényben a kép betöltésekor:
+            imgElem.alt = `AI generált kép: ${userPrompt}`;
 
             imgElem.onload = () => {
                 placeholder.classList.add('hidden');
