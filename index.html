@@ -623,7 +623,12 @@ faq3A: "Igen, teljes mértékben. Az alkalmazás nem tárolja el a kulcsaidat; a
 faq4Q: "Mit jelent a Temperature és a Guidance Scale?",
 faq4A: "A Temperature a szöveges válaszok kreativitását és kiszámíthatóságát szabályozza, míg a Guidance Scale a képgenerálásnál határozza meg, hogy a modell mennyire kövesse a promptot.",
 faq5Q: "Milyen AI modelleket tesztelhetek az oldalon?",
-faq5A: "Tesztelhetsz szöveges modelleket (GPT, Llama, Gemini, DeepSeek), képgenerálókat (Flux), valamint zene- és hanggenerálókat is."
+faq5A: "Tesztelhetsz szöveges modelleket (GPT, Llama, Gemini, DeepSeek), képgenerálókat (Flux), valamint zene- és hanggenerálókat is.",
+paramVideoTitle: "Videó hossza (másodperc)",
+    paramVideoDesc: "Állítsd be a generálandó videó időtartamát.",
+    submitBtnVid: "🎬 Videó Generálása",
+    promptBoxTipVid: "💡 Tipp: A jó videó prompt tartalmazza a témát, a mozgást és a kameramozgást (pl. 'drone shot, slow motion').",
+    promptPlaceholderVid: "Írd le a videót angolul (pl. 'A futuristic car driving through a rainy cyber city at night, 4k')..."
 
         },
         en: {
@@ -1073,7 +1078,7 @@ function setTxt(id, htmlContent) {
             aiResponseContainer.classList.add('hidden');
             imageSection.classList.add('hidden');
             audioSection.classList.remove('hidden');
-            
+            videoSection.classList.add('hidden');
             // Audio modelleknél elrejtjük a csúszkát
             modelParamContainer.classList.add('hidden');
 
@@ -1095,7 +1100,7 @@ function setTxt(id, htmlContent) {
             aiResponseContainer.classList.add('hidden');
             audioSection.classList.add('hidden');
             imageSection.classList.remove('hidden');
-
+videoSection.classList.add('hidden');
             // Képeknél megjelenítjük a csúszkát a CFG (Guidance) módosítására
             modelParamContainer.classList.remove('hidden');
             paramLabel.innerText = t.paramImageTitle;
@@ -1160,7 +1165,7 @@ function setTxt(id, htmlContent) {
             aiResponseContainer.classList.remove('hidden');
             imageSection.classList.add('hidden');
             audioSection.classList.add('hidden');
-
+videoSection.classList.add('hidden');
             // Szöveges modelleknél megjelenítjük a Temperature csúszkát
             modelParamContainer.classList.remove('hidden');
             paramLabel.innerText = t.paramTextTitle;
