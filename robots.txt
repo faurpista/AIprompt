@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://faurpista.github.io/AIprompt/sitemap.xml
