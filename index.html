@@ -860,7 +860,9 @@ body {
         if (imgPlaceholder) imgPlaceholder.innerText = t.imagePlaceholderText;
 
         document.getElementById('audioTitle').innerText = t.audioTitle;
-        document.getElementById('audioPlaceholderText').innerText = t.audioPlaceholderText;
+        //document.getElementById('audioPlaceholderText').innerText = t.audioPlaceholderText;
+        const audioPlaceholder = document.getElementById('audioPlaceholderText');
+        if (audioPlaceholder) audioPlaceholder.innerText = t.audioPlaceholderText;
         document.getElementById('downloadAudioBtnText').innerText = t.downloadAudioBtnText;
 
         const selectedModel = document.getElementById("modelSelect").value;
