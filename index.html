@@ -1525,6 +1525,12 @@ async function generateVideoModel() {
             if (!response.ok) {
                 throw new Error(`Pollinations hiba (${response.status}): Nem sikerült a videó generálása.`);
             }
+const videoBlob = await response.blob();
+
+// 🛑 Ellenőrzés: Ha JPEG-et kaptunk videó helyett
+if (videoBlob.type.includes('image')) {
+    throw new Error("A Pollinations jelenleg nem tudott videót generálni, csak képet adott vissza. Próbáld újra pár perc múlva!");
+}
 
             const videoBlob = await response.blob();
             finalVideoUrl = URL.createObjectURL(videoBlob);
@@ -1556,6 +1562,9 @@ async function generateVideoModel() {
             }
 
             const videoBlob = await response.blob();
+            if (!videoBlob.type.includes('video')) {
+            throw new Error("A Hugging Face válasza nem érvényes videó fájl.");
+            }
             finalVideoUrl = URL.createObjectURL(videoBlob);
         }
 
