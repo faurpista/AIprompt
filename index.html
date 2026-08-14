@@ -412,7 +412,11 @@ body {
  <div id="videoEvalSection" class="hidden flex flex-col justify-between h-full">
     <div>
     <h2 id="generatedVidTitle" class="text-xl font-bold mb-4 text-pink-400">Generált Videó</h2>
-    <div class="bg-gray-950 p-2 rounded-xl border border-gray-700 min-h-[280px] flex items-center justify-center relative overflow-hidden">
+     <!-- 💡 ÚJ: Tájékoztató üzenet sáv (alapból rejtve) -->
+        <div id="videoNotice" class="hidden mb-3 p-3 bg-amber-900/40 border border-amber-500/50 rounded-lg text-amber-200 text-xs font-medium text-center">
+            <!-- Ide kerül a dinamikus hiba/figyelmeztető szöveg -->
+        </div>
+        <div class="bg-gray-950 p-2 rounded-xl border border-gray-700 min-h-[280px] flex items-center justify-center relative overflow-hidden">
         <!-- Helykitöltő (Placeholder) a videó elkészültéig -->
         <div id="videoPlaceholder" class="text-gray-500 text-center p-4">
             <span class="text-4xl block mb-2" aria-hidden="true">🎬</span>
@@ -1554,6 +1558,7 @@ async function fetchPollinationsVideoWithRetry(promptText, maxRetries = 3, delay
         
 async function generateVideoModel() {
     const t = translations[currentLang] || translations.hu;
+   const videoEvalSection = document.getElementById('videoEvalSection');
     const videoElem = document.getElementById('generatedVideo');
     const placeholder = document.getElementById('videoPlaceholder');
     const downloadBtn = document.getElementById('downloadVidBtn');
@@ -1562,7 +1567,7 @@ async function generateVideoModel() {
     const submitBtn = document.getElementById('submitVidBtn') || document.getElementById('submitBtn');
     const modelSelect = document.getElementById('modelSelect');
  const fallbackImg = document.getElementById('generatedVideoFallbackImg');
-
+ const noticeElem = document.getElementById('videoNotice');
     const promptText = userPromptInput ? userPromptInput.value.trim() : '';
     const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
     const selectedModel = modelSelect ? modelSelect.value : 'pollinations-video';
@@ -1577,6 +1582,8 @@ async function generateVideoModel() {
         submitBtn.disabled = true;
         submitBtn.innerText = t.generatingText || "Generálás...";
     }
+     if (videoEvalSection) videoEvalSection.classList.remove('hidden');
+
     placeholder.classList.remove('hidden');
     videoElem.classList.add('hidden');
     downloadBtn.classList.add('hidden');
@@ -1586,51 +1593,76 @@ async function generateVideoModel() {
 
         // 1. Pollinations Ingyenes Videó Modell (Wan 2.1)
         if (selectedModel === 'pollinations-video') {
+          // Média elemek tiszta alaphelyzetbe állítása
+    if (placeholder) placeholder.classList.remove('hidden');
+    if (videoElem) { 
+        videoElem.classList.add('hidden'); 
+        videoElem.pause(); 
+        videoElem.src = ''; 
+    }
+    if (fallbackImg) { 
+        fallbackImg.classList.add('hidden'); 
+        fallbackImg.src = ''; 
+    }
+    if (noticeElem) { 
+        noticeElem.classList.add('hidden'); 
+        noticeElem.innerText = ''; 
+    }
+    if (downloadBtn) downloadBtn.classList.add('hidden');
+
+ 
             try {
         // 🔄 Újrapróbálós hívás (Max 3 próbálkozás, próbálkozások között 2000 ms szünet)
         const result = await fetchPollinationsVideoWithRetry(promptText, 3, 2000);
 
+        if (placeholder) placeholder.classList.add('hidden');
+
         if (result.isVideo) {
-            // ✅ VALÓDI VIDEÓ BETÖLTÉSE
+            // =========================================================
+            // A) VALÓDI VIDEÓ ESETÉN
+            // =========================================================
             await new Promise((resolve, reject) => {
                 videoElem.onloadeddata = () => resolve();
-                videoElem.onerror = () => reject(new Error(t.errVideoFormat || "A videó formátuma nem lejátszható."));
+                videoElem.onerror = () => reject(new Error(t.errVideoFormat || "A videó nem lejátszható."));
                 videoElem.src = result.url;
             });
 
-            placeholder.classList.add('hidden');
-            if (fallbackImg) fallbackImg.classList.add('hidden');
             videoElem.classList.remove('hidden');
 
+            // Letöltés beállítása videóhoz (.mp4)
             downloadBtn.href = result.url;
             downloadBtn.download = `generated-video-${Date.now()}.mp4`;
+            if (downloadBtnText) downloadBtnText.innerText = t.downloadVidBtnText || "Videó Letöltése";
             downloadBtn.classList.remove('hidden');
 
         } else {
-            // ⚠️ KÍMÉLETES IMAGE FALLBACK (Videó helyett kép megjelenítése)
-            placeholder.classList.add('hidden');
+            // =========================================================
+            // B) KÉP FALLBACK ESETÉN (A <video> REJTVE MARAD!)
+            // =========================================================
             
+            // 1. Tájékoztató doboz megjelenítése
+            if (noticeElem) {
+                noticeElem.innerText = `⚠️ ${t.msgVideoFallbackNotice || 'A videószerverek leterheltsége miatt videó helyett az előnézeti képet jelenítettük meg.'}`;
+                noticeElem.classList.remove('hidden');
+            }
+
+            // 2. Csak a kép megjelenítése
             if (fallbackImg) {
                 fallbackImg.src = result.url;
                 fallbackImg.classList.remove('hidden');
-            } else {
-                // Ha nincs külön fallback <img> elem a DOM-ban, figyelmeztetést adunk
-                alert(t.msgVideoFallbackNotice || "A videószerverek túlterheltsége miatt videó helyett az előnézeti képet jelenítettük meg.");
             }
 
+            // 3. Letöltő gomb feliratának és kiterjesztésének frissítése (.jpg)
             downloadBtn.href = result.url;
             downloadBtn.download = `generated-preview-${Date.now()}.jpg`;
+            if (downloadBtnText) downloadBtnText.innerText = t.downloadImgBtnText || "Kép Letöltése";
             downloadBtn.classList.remove('hidden');
         }
 
     } catch (error) {
-        console.error("Videógenerálási hiba:", error);
-        alert(error.message || t.evalErrorDesc || "Hiba történt a videó generálása során.");
-        
-        placeholder.classList.remove('hidden');
-        if (videoElem) videoElem.classList.add('hidden');
-        if (fallbackImg) fallbackImg.classList.add('hidden');
-        downloadBtn.classList.add('hidden');
+        console.error("Generálási hiba:", error);
+        alert(error.message || t.evalErrorDesc || "Hiba történt a generálás során.");
+        if (placeholder) placeholder.classList.remove('hidden');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
