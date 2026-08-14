@@ -1483,6 +1483,7 @@ videoSection.classList.add('hidden');
         }
     }
 async function generateVideoModel() {
+      const t = translations[currentLang] || translations.hu;
     const videoElem = document.getElementById('generatedVideo');
     const placeholder = document.getElementById('videoPlaceholder');
     const downloadBtn = document.getElementById('downloadVidBtn');
