@@ -1615,8 +1615,10 @@ async function generateVideoModel() {
         // 🔄 Újrapróbálós hívás (Max 3 próbálkozás, próbálkozások között 2000 ms szünet)
         const result = await fetchPollinationsVideoWithRetry(promptText, 3, 2000);
 
-        if (placeholder) placeholder.classList.add('hidden');
-
+        if (placeholder) {
+            placeholder.classList.add('hidden');
+            placeholder.style.display = 'none'; // 🟢 Inline style az átfedések megakadályozására
+        }
         if (result.isVideo) {
             // =========================================================
             // A) VALÓDI VIDEÓ ESETÉN
@@ -1650,6 +1652,7 @@ async function generateVideoModel() {
             if (fallbackImg) {
                 fallbackImg.src = result.url;
                 fallbackImg.classList.remove('hidden');
+                fallbackImg.style.display = 'block'; // 🟢 Csak a kép jelenik meg a dobozban!
             }
 
             // 3. Letöltő gomb feliratának és kiterjesztésének frissítése (.jpg)
