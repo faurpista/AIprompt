@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>ACE-Step API teszt</title>
+</head>
+<body>
+
+<h2>ACE-Step konzol teszt</h2>
+
+<p>
+    Nyisd meg az F12 → Console ablakot,
+    majd kattints a gombra.
+</p>
+
+<button onclick="testAceStep()">
+    🎵 ACE-Step teszt
+</button>
+
+<script>
+
+async function testAceStep() {
+
+    console.clear();
+
+    console.log("====================================");
+    console.log("🎵 ACE-STEP TESZT");
+    console.log("====================================");
+
+    // ----------------------------------
+    // EZT ÍRD ÁT
+    // ----------------------------------
+
+    const RENDER_URL =
+        "https://SAJAT-RENDER-URL.onrender.com";
+
+    // Saját HF tokened
+    const hfToken =
+        prompt("Add meg a Hugging Face tokened (hf_...):");
+
+    if (!hfToken) {
+        console.error("❌ Nincs HF token.");
+        return;
+    }
+
+    const promptText =
+        "cinematic electronic music, deep bass, powerful drums, atmospheric synthesizer, instrumental";
+
+    console.log("🎼 Prompt:");
+    console.log(promptText);
+
+    console.log("🔐 HF token:");
+    console.log("BEÉRKEZETT (nem jelenítjük meg)");
+
+    // ----------------------------------
+    // REQUEST
+    // ----------------------------------
+
+    const url =
+        `${RENDER_URL}/api/generate-free-audio`;
+
+    console.log("🌐 URL:");
+    console.log(url);
+
+    console.log("➡️ POST...");
+
+    const start =
+        performance.now();
+
+    try {
+
+        const response =
+            await fetch(url, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    prompt:
+                        promptText,
+
+                    hfToken:
+                        hfToken,
+
+                    duration:
+                        10,
+
+                    seed:
+                        -1
+
+                })
+
+            });
+
+        const elapsed =
+            (
+                performance.now() -
+                start
+            ).toFixed(0);
+
+        console.log(
+            `⬅️ HTTP ${response.status} (${elapsed} ms)`
+        );
+
+        console.log(
+            "Content-Type:",
+            response.headers.get(
+                "content-type"
+            )
+        );
+
+        // ----------------------------------
+        // HIBA
+        // ----------------------------------
+
+        if (!response.ok) {
+
+            const contentType =
+                response.headers.get(
+                    "content-type"
+                ) || "";
+
+            let error;
+
+            if (
+                contentType.includes(
+                    "application/json"
+                )
+            ) {
+
+                error =
+                    await response.json();
+
+            } else {
+
+                error =
+                    await response.text();
+
+            }
+
+            console.error(
+                "❌ ACE-STEP HIBA:"
+            );
+
+            console.error(error);
+
+            return;
+        }
+
+        // ----------------------------------
+        // AUDIO
+        // ----------------------------------
+
+        const blob =
+            await response.blob();
+
+        console.log(
+            "===================================="
+        );
+
+        console.log(
+            "✅ SIKERES GENERÁLÁS!"
+        );
+
+        console.log(
+            "🎵 Méret:",
+            blob.size,
+            "byte"
+        );
+
+        console.log(
+            "🎧 Típus:",
+            blob.type
+        );
+
+        // ----------------------------------
+        // AUDIO LEJÁTSZÁS
+        // ----------------------------------
+
+        const audioUrl =
+            URL.createObjectURL(
+                blob
+            );
+
+        console.log(
+            "🔗 Audio URL:",
+            audioUrl
+        );
+
+        const audio =
+            new Audio(audioUrl);
+
+        audio.controls = true;
+
+        // A konzolból is elérhető lesz
+        window.testAudio =
+            audio;
+
+        audio.onloadedmetadata =
+            () => {
+
+                console.log(
+                    "⏱️ Hossz:",
+                    audio.duration,
+                    "másodperc"
+                );
+
+            };
+
+        await audio.play();
+
+        console.log(
+            "▶️ Lejátszás elindult."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "===================================="
+        );
+
+        console.error(
+            "❌ FETCH / NETWORK HIBA"
+        );
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+</script>
+
+</body>
+  </html>
