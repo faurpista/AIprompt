@@ -552,7 +552,7 @@ body {
         }
     });
 
-    const isImageModel = (model) => model === 'pollinations-image' || model.includes('huggingface-flux');
+    const isImageModel = (model) => model === 'pollinations-image' || model.includes('flux');
     const isAudioModel = (model) => model === 'pollinations-audio' || model.includes('audio') || model.includes('music') || model.includes('ace');
 const isVideoModel = (model) => 
   model === 'pollinations-video' || 
@@ -1311,7 +1311,7 @@ videoSection.classList.add('hidden');
         const audioContainer = document.getElementById('audioContainer');
         const audioElement = document.getElementById('generatedAudio');
         const downloadBtn = document.getElementById('downloadAudioBtn');
-
+        const paramSlider = document.getElementById('paramSlider');
         if (!userPrompt) { alert(t.errPrompt); return; }
 
         if (submitBtn) {
@@ -1330,7 +1330,9 @@ videoSection.classList.add('hidden');
 // 🟢 1. AUTOMATIKUS FORDÍTÁS ANGOLRA A HÁTTÉRBEN
         // Ha a currentLang pl. 'hu', 'de', 'fr', 'pl', lefordítja angolra a generáláshoz
         const englishPrompt = await translateToEnglishIfNeeded(userPrompt, currentLang);
+const guidanceScale = parseFloat(paramSlider.value) || 10;
 
+         
 if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') || selectedModel.includes('ace')) {
     const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
 
