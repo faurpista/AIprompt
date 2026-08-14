@@ -1532,7 +1532,6 @@ if (videoBlob.type.includes('image')) {
     throw new Error("A Pollinations jelenleg nem tudott videót generálni, csak képet adott vissza. Próbáld újra pár perc múlva!");
 }
 
-            const videoBlob = await response.blob();
             finalVideoUrl = URL.createObjectURL(videoBlob);
         } 
         // 2. Hugging Face Modellek
