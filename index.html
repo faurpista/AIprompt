@@ -1325,6 +1325,10 @@ videoSection.classList.add('hidden');
 
         try {
             let audioUrl = "";
+// 🟢 1. AUTOMATIKUS FORDÍTÁS ANGOLRA A HÁTTÉRBEN
+        // Ha a currentLang pl. 'hu', 'de', 'fr', 'pl', lefordítja angolra a generáláshoz
+        const englishPrompt = await translateToEnglishIfNeeded(userPrompt, currentLang);
+
 
             if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen')) {
                 const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
@@ -1338,10 +1342,6 @@ videoSection.classList.add('hidden');
                 if (audioPlaceholder) {
                     audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren...</span>`;
                 }
-// 🟢 1. AUTOMATIKUS FORDÍTÁS ANGOLRA A HÁTTÉRBEN
-        // Ha a currentLang pl. 'hu', 'de', 'fr', 'pl', lefordítja angolra a generáláshoz
-        const englishPrompt = await translateToEnglishIfNeeded(userPrompt, currentLang);
-
                 const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-audio", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
