@@ -418,7 +418,8 @@ body {
             <span class="text-4xl block mb-2" aria-hidden="true">🎬</span>
             <span id="videoPlaceholderText">Írj egy leírást angolul a jobb eredményért, majd kattints a generálás gombra!</span>
         </div>
-        
+        <img id="generatedVideoFallbackImg" class="w-full h-auto max-h-[350px] object-contain rounded-lg hidden shadow-lg" alt="AI által generált kép" />
+            
         <!-- A generált videó lejátszója -->
         <video id="generatedVideo" controls class="w-full h-auto max-h-[350px] object-contain rounded-lg hidden shadow-lg"></video>
     </div>
@@ -634,7 +635,8 @@ paramVideoTitle: "Videó hossza (másodperc)",
     promptPlaceholderVid: "Írd le a videót angolul (pl. 'A futuristic car driving through a rainy cyber city at night, 4k')...",
     errVideoFallback: "A szerver jelenleg túlterhelt, és videó helyett csak képet adott vissza. Próbáld újra 1-2 perc múlva!",
 errVideoFormat: "A kapott fájl formátuma nem lejátszható videó.",
-errVideoTimeout: "A videó generálása időtúllépés miatt megszakadt."
+errVideoTimeout: "A videó generálása időtúllépés miatt megszakadt.",
+msgVideoFallbackNotice: "A videószerverek jelenleg túlterheltek. Videó helyett a generált előnézeti képet jelenítettük meg!"
         
 
         },
@@ -718,8 +720,8 @@ promptBoxTipVid: "💡 Tip: A good video prompt includes the subject, motion, an
 promptPlaceholderVid: "Describe the video in English (e.g., 'A futuristic car driving through a rainy cyber city at night, 4k')...",
 errVideoFallback: "The server is currently overloaded and returned an image instead of a video. Please try again in 1-2 minutes!",
 errVideoFormat: "The received file is not a playable video format.",
-errVideoTimeout: "Video generation timed out."
-            
+errVideoTimeout: "Video generation timed out.",
+msgVideoFallbackNotice: "Video servers are currently overloaded. Generated preview image displayed instead!"            
 
         },
         de: {
@@ -1498,49 +1500,56 @@ videoSection.classList.add('hidden');
 // 🔄 Újrapróbálós Pollinations Videó/Animáció Lelkérő
 async function fetchPollinationsVideoWithRetry(promptText, maxRetries = 3, delayMs = 2000) {
     const encodedPrompt = encodeURIComponent(promptText);
+    let lastImageBlobUrl = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            // Minden próbálkozásnál új seed-et adunk hozzá a cache elkerülésére
+            // Minden próbálkozásnál új seed a cache elkerülésére
             const randomSeed = Math.floor(Math.random() * 1000000);
             const videoUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&animate=true&seed=${randomSeed}&nologo=true`;
 
-            const response = await fetch(videoUrl, {
-                method: 'GET',
-                credentials: 'omit'
-            });
+            const response = await fetch(videoUrl, { credentials: 'omit' });
+            if (!response.ok) throw new Error(`HTTP hiba: ${response.status}`);
 
-            if (!response.ok) {
-                throw new Error(`Szerver válaszkód: ${response.status}`);
+            const blob = await response.blob();
+
+            // 🟢 SIKER: Valódi videó vagy animált GIF érkezett
+            if (blob.type.includes('video') || blob.type.includes('gif')) {
+                return {
+                    url: URL.createObjectURL(blob),
+                    isVideo: true,
+                    mimeType: blob.type
+                };
             }
 
-            const videoBlob = await response.blob();
-
-            // 🛑 ELLENŐRZÉS: Ha statikus képet (JPEG/PNG) kaptunk videó helyett
-            if (videoBlob.type.includes('image/jpeg') || videoBlob.type.includes('image/png')) {
-                throw new Error("A szerver videó helyett képet küldött vissza (fallback).");
+            // 🟡 FALLBACK ELTENYÉSZTÉS: Képet kaptunk videó helyett (elmentjük tartaléknak)
+            if (blob.type.includes('image')) {
+                if (lastImageBlobUrl) URL.revokeObjectURL(lastImageBlobUrl); // Korábbi Blob törlése
+                lastImageBlobUrl = URL.createObjectURL(blob);
             }
 
-            // 🛑 ELLENŐRZÉS: Ha nem video vagy animált formátum
-            if (!videoBlob.type.includes('video') && !videoBlob.type.includes('gif')) {
-                throw new Error(`Nem megfelelő válaszformátum: ${videoBlob.type}`);
-            }
+            console.warn(`Próbálkozás (${attempt}/${maxRetries}): A szerver képet adott videó helyett, újrapróbáljuk...`);
 
-            // ✅ SIKER: Visszaadjuk a generált Blob URL-t
-            return URL.createObjectURL(videoBlob);
+        } catch (err) {
+            console.warn(`Próbálkozás (${attempt}/${maxRetries}) hiba:`, err.message);
+        }
 
-        } catch (error) {
-            console.warn(`Pollinations próbálkozás (${attempt}/${maxRetries}) sikertelen: ${error.message}`);
-
-            // Ha ez volt az utolsó próbálkozás, továbbdobja a hibát
-            if (attempt === maxRetries) {
-                throw new Error(`A videó generálása ${maxRetries} próbálkozás után sem sikerült. A szerver jelenleg leterhelt.`);
-            }
-
-            // Várakozás a következő próbálkozás előtt (pl. 2 mp)
+        // Várakozás a következő próbálkozás előtt (pl. 2 másodperc)
+        if (attempt < maxRetries) {
             await new Promise(resolve => setTimeout(resolve, delayMs));
         }
     }
+
+    // 🟢 HA 3 PRÓBÁLKOZÁSRA SEM JÖTT VIDEÓ, DE KÉP IGEN:
+    if (lastImageBlobUrl) {
+        return {
+            url: lastImageBlobUrl,
+            isVideo: false,
+            mimeType: 'image/jpeg'
+        };
+    }
+
+    throw new Error("A videószerver jelenleg nem érhető el. Próbáld újra később!");
 }
         
 async function generateVideoModel() {
@@ -1552,6 +1561,7 @@ async function generateVideoModel() {
     const userPromptInput = document.getElementById('userPrompt');
     const submitBtn = document.getElementById('submitVidBtn') || document.getElementById('submitBtn');
     const modelSelect = document.getElementById('modelSelect');
+ const fallbackImg = document.getElementById('generatedVideoFallbackImg');
 
     const promptText = userPromptInput ? userPromptInput.value.trim() : '';
     const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
@@ -1578,29 +1588,48 @@ async function generateVideoModel() {
         if (selectedModel === 'pollinations-video') {
             try {
         // 🔄 Újrapróbálós hívás (Max 3 próbálkozás, próbálkozások között 2000 ms szünet)
-        const finalVideoUrl = await fetchPollinationsVideoWithRetry(promptText, 3, 2000);
+        const result = await fetchPollinationsVideoWithRetry(promptText, 3, 2000);
 
-        // Videó betöltése az elembe Promise segítségével
-        await new Promise((resolve, reject) => {
-            videoElem.onloadeddata = () => resolve();
-            videoElem.onerror = () => reject(new Error(t.errVideoFormat || "A videó formátuma nem lejátszható."));
-            videoElem.src = finalVideoUrl;
-        });
+        if (result.isVideo) {
+            // ✅ VALÓDI VIDEÓ BETÖLTÉSE
+            await new Promise((resolve, reject) => {
+                videoElem.onloadeddata = () => resolve();
+                videoElem.onerror = () => reject(new Error(t.errVideoFormat || "A videó formátuma nem lejátszható."));
+                videoElem.src = result.url;
+            });
 
-        // Sikeres megjelenítés frissítése
-        placeholder.classList.add('hidden');
-        videoElem.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            if (fallbackImg) fallbackImg.classList.add('hidden');
+            videoElem.classList.remove('hidden');
 
-        downloadBtn.href = finalVideoUrl;
-        downloadBtn.download = `generated-animation-${Date.now()}.mp4`;
-        downloadBtn.classList.remove('hidden');
+            downloadBtn.href = result.url;
+            downloadBtn.download = `generated-video-${Date.now()}.mp4`;
+            downloadBtn.classList.remove('hidden');
+
+        } else {
+            // ⚠️ KÍMÉLETES IMAGE FALLBACK (Videó helyett kép megjelenítése)
+            placeholder.classList.add('hidden');
+            
+            if (fallbackImg) {
+                fallbackImg.src = result.url;
+                fallbackImg.classList.remove('hidden');
+            } else {
+                // Ha nincs külön fallback <img> elem a DOM-ban, figyelmeztetést adunk
+                alert(t.msgVideoFallbackNotice || "A videószerverek túlterheltsége miatt videó helyett az előnézeti képet jelenítettük meg.");
+            }
+
+            downloadBtn.href = result.url;
+            downloadBtn.download = `generated-preview-${Date.now()}.jpg`;
+            downloadBtn.classList.remove('hidden');
+        }
 
     } catch (error) {
         console.error("Videógenerálási hiba:", error);
         alert(error.message || t.evalErrorDesc || "Hiba történt a videó generálása során.");
         
         placeholder.classList.remove('hidden');
-        videoElem.classList.add('hidden');
+        if (videoElem) videoElem.classList.add('hidden');
+        if (fallbackImg) fallbackImg.classList.add('hidden');
         downloadBtn.classList.add('hidden');
     } finally {
         if (submitBtn) {
