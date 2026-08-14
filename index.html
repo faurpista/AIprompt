@@ -440,15 +440,7 @@ body {
 
                 <!-- 3. Zenegeneráló szekció -->
                 <div id="audioEvalSection" class="hidden flex flex-col justify-between h-full">
-                    <div>
-                        <h2 id="audioTitle" class="text-xl font-bold mb-4 text-purple-400">🎵 Generált Zene</h2>
-                        <div class="bg-gray-950 p-6 rounded-xl border border-gray-700 min-h-[280px] flex flex-col items-center justify-center relative">
-                            <div id="audioPlaceholder" class="text-gray-500 text-center p-4">
-                                <span class="text-5xl block mb-3" aria-hidden="true">🎧</span>
-                                <span id="audioPlaceholderText" class="text-sm">Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!</span>
-                            </div>
-                            <!-- DALSZÖVEG SZEKCIÓ -->
-<div class="mt-4">
+                  <div class="mt-4">
     <div class="flex justify-between items-center mb-2">
         <label for="lyricsInput" class="block text-sm font-medium text-gray-300">
             🎤 Dalszöveg (ACE-Step-hez):
@@ -467,7 +459,16 @@ body {
         rows="6" 
         placeholder="[Verse]&#10;In the silent night, under glowing skies...&#10;&#10;[Chorus]&#10;Electric hearts burning bright..."
         class="w-full p-3 bg-gray-800 text-gray-100 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono transition"></textarea>
-</div>
+                  </div>
+                    <div>
+                        <h2 id="audioTitle" class="text-xl font-bold mb-4 text-purple-400">🎵 Generált Zene</h2>
+                        <div class="bg-gray-950 p-6 rounded-xl border border-gray-700 min-h-[280px] flex flex-col items-center justify-center relative">
+                            <div id="audioPlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-5xl block mb-3" aria-hidden="true">🎧</span>
+                                <span id="audioPlaceholderText" class="text-sm">Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!</span>
+                            </div>
+                            <!-- DALSZÖVEG SZEKCIÓ -->
+
 
                             <div id="audioContainer" class="hidden w-full flex flex-col items-center space-y-4">
                                 <div class="w-20 h-20 rounded-full bg-purple-900/50 border-2 border-purple-500 flex items-center justify-center animate-pulse">
@@ -1176,7 +1177,18 @@ function setTxt(id, htmlContent) {
             audioSection.classList.remove('hidden');
             videoSection.classList.add('hidden');
             // Audio modelleknél elrejtjük a csúszkát
-            modelParamContainer.classList.add('hidden');
+            modelParamContainer.classList.remove('hidden');
+            paramLabel.innerText = t.paramImageTitle;
+            paramDescription.innerText = t.paramImageDesc;
+            paramSlider.min = "2";
+            paramSlider.max = "20";
+            paramSlider.step = "0.5";
+            if (parseFloat(paramSlider.value) < 2 || parseFloat(paramSlider.value) > 20) {
+                paramSlider.value = "10";
+            }
+            paramValueDisplay.innerText = paramSlider.value;
+
+
 
             if (selectedModel.includes('pollinations')) {
                 apiKeyContainer.style.display = 'none';
