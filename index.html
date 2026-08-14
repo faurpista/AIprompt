@@ -1330,7 +1330,11 @@ videoSection.classList.add('hidden');
 // 🟢 1. AUTOMATIKUS FORDÍTÁS ANGOLRA A HÁTTÉRBEN
         // Ha a currentLang pl. 'hu', 'de', 'fr', 'pl', lefordítja angolra a generáláshoz
         const englishPrompt = await translateToEnglishIfNeeded(userPrompt, currentLang);
-const guidanceScale = parseFloat(paramSlider.value) || 10;
+  // ⏱️ Zene hossza a csúszkáról (alapértelmezett 10 mp, ha nincs kitöltve)
+    const audioDuration = parseFloat(paramSlider?.value) || 10;
+
+    // 🎤 Dalszöveg kiolvasása (ha van ilyen input meződ az oldalon)
+    const lyricsText = typeof lyricsInput !== 'undefined' && lyricsInput ? lyricsInput.value.trim() : "";
 
          
 if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') || selectedModel.includes('ace')) {
@@ -1355,7 +1359,9 @@ if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             prompt: englishPrompt,
-            hfToken: hfToken
+            hfToken: hfToken,
+            duration: audioDuration, // 👈 Itt adjuk át a hosszt!
+            lyrics: lyricsText    
         })
     });
 
