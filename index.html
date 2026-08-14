@@ -1178,9 +1178,9 @@ function setTxt(id, htmlContent) {
             videoSection.classList.add('hidden');
             // Audio modelleknél elrejtjük a csúszkát
             modelParamContainer.classList.remove('hidden');
-            paramLabel.innerText = t.paramImageTitle;
-            paramDescription.innerText = t.paramImageDesc;
-            paramSlider.min = "2";
+            paramLabel.innerText = t.paramVideoTitle;
+    paramDescription.innerText = t.paramVideoDesc;
+        paramSlider.min = "2";
             paramSlider.max = "20";
             paramSlider.step = "0.5";
             if (parseFloat(paramSlider.value) < 2 || parseFloat(paramSlider.value) > 20) {
@@ -1329,7 +1329,7 @@ videoSection.classList.add('hidden');
     };
 async function generateLyrics() {
     // 1. Elemek beazonosítása (cseréld ki a promptInput ID-t a te fő prompt meződ ID-jára, ha más!)
-    const promptInput = document.getElementById("promptInput") || document.querySelector("textarea[name='prompt']") || document.querySelector("input[type='text']");
+    const promptInput = document.getElementById("userPrompt") || document.querySelector("textarea[name='prompt']") || document.querySelector("input[type='text']");
     const lyricsInput = document.getElementById("lyricsInput");
     const genLyricsBtn = document.getElementById("genLyricsBtn");
 
