@@ -631,7 +631,11 @@ paramVideoTitle: "Videó hossza (másodperc)",
     paramVideoDesc: "Állítsd be a generálandó videó időtartamát.",
     submitBtnVid: "🎬 Videó Generálása",
     promptBoxTipVid: "💡 Tipp: A jó videó prompt tartalmazza a témát, a mozgást és a kameramozgást (pl. 'drone shot, slow motion').",
-    promptPlaceholderVid: "Írd le a videót angolul (pl. 'A futuristic car driving through a rainy cyber city at night, 4k')..."
+    promptPlaceholderVid: "Írd le a videót angolul (pl. 'A futuristic car driving through a rainy cyber city at night, 4k')...",
+    errVideoFallback: "A szerver jelenleg túlterhelt, és videó helyett csak képet adott vissza. Próbáld újra 1-2 perc múlva!",
+errVideoFormat: "A kapott fájl formátuma nem lejátszható videó.",
+errVideoTimeout: "A videó generálása időtúllépés miatt megszakadt."
+        
 
         },
         en: {
@@ -711,7 +715,11 @@ paramVideoTitle: "Video Duration (seconds)",
 paramVideoDesc: "Set the duration for the video to be generated.",
 submitBtnVid: "🎬 Generate Video",
 promptBoxTipVid: "💡 Tip: A good video prompt includes the subject, motion, and camera movement (e.g., 'drone shot, slow motion').",
-promptPlaceholderVid: "Describe the video in English (e.g., 'A futuristic car driving through a rainy cyber city at night, 4k')..."
+promptPlaceholderVid: "Describe the video in English (e.g., 'A futuristic car driving through a rainy cyber city at night, 4k')...",
+errVideoFallback: "The server is currently overloaded and returned an image instead of a video. Please try again in 1-2 minutes!",
+errVideoFormat: "The received file is not a playable video format.",
+errVideoTimeout: "Video generation timed out."
+            
 
         },
         de: {
@@ -793,10 +801,11 @@ paramVideoTitle: "Videolänge (Sekunden)",
 paramVideoDesc: "Stelle die Dauer des zu generierenden Videos ein.",
 submitBtnVid: "🎬 Video generieren",
 promptBoxTipVid: "💡 Tipp: Ein guter Video-Prompt enthält das Thema, die Bewegung und die Kamerabewegung (z. B. 'drone shot, slow motion').",
-promptPlaceholderVid: "Beschreibe das Video auf Englisch (z. B. 'A futuristic car driving through a rainy cyber city at night, 4k')..."
+promptPlaceholderVid: "Beschreibe das Video auf Englisch (z. B. 'A futuristic car driving through a rainy cyber city at night, 4k')...",
+errVideoFallback: "Der Server ist derzeit überlastet und hat statt eines Videos nur ein Bild zurückgegeben. Bitte versuche es in 1-2 Minuten erneut!",
+errVideoFormat: "Das empfangene Dateiformat ist kein abspielbares Video.",
+errVideoTimeout: "Die Videogenerierung hat das Zeitlimit überschritten."
             
-
-
         },
         fr: {
             mainTitle: "Évaluateur & Optimiseur de Prompt IA",
@@ -877,10 +886,11 @@ paramVideoTitle: "Durée de la vidéo (secondes)",
 paramVideoDesc: "Définissez la durée de la vidéo à générer.",
 submitBtnVid: "🎬 Générer la vidéo",
 promptBoxTipVid: "💡 Conseil : Un bon prompt vidéo inclut le sujet, le mouvement et les mouvements de caméra (ex. 'drone shot, slow motion').",
-promptPlaceholderVid: "Décrivez la vidéo en anglais (ex. 'A futuristic car driving through a rainy cyber city at night, 4k')..."
+promptPlaceholderVid: "Décrivez la vidéo en anglais (ex. 'A futuristic car driving through a rainy cyber city at night, 4k')...",
+errVideoFallback: "Le serveur est actuellement surchargé et a renvoyé une image au lieu d'une vidéo. Veuillez réessayer dans 1 à 2 minutes !",
+errVideoFormat: "Le fichier reçu n'est pas un format vidéo jouable.",
+errVideoTimeout: "La génération de la vidéo a expiré."
             
-
-
         },
         pl: {
             mainTitle: "Evaluator i Optymalizator Promptów AI",
@@ -959,7 +969,10 @@ promptPlaceholderVid: "Décrivez la vidéo en anglais (ex. 'A futuristic car dri
 paramVideoDesc: "Ustaw czas trwania generowanego wideo.",
 submitBtnVid: "🎬 Generuj wideo",
 promptBoxTipVid: "💡 Wskazówka: Dobry prompt wideo zawiera temat, ruch oraz ruch kamery (np. 'drone shot, slow motion').",
-promptPlaceholderVid: "Opisz wideo po angielsku (np. 'A futuristic car driving through a rainy cyber city at night, 4k')..."
+promptPlaceholderVid: "Opisz wideo po angielsku (np. 'A futuristic car driving through a rainy cyber city at night, 4k')...",
+errVideoFallback: "Serwer jest obecnie przeciążony i zwrócił obraz zamiast wideo. Spróbuj ponownie za 1-2 minuty!",
+errVideoFormat: "Otrzymany plik nie jest odtwarzalnym formatem wideo.",
+errVideoTimeout: "Przekroczono limit czasu generowania wideo."
            
 
         }
@@ -1482,6 +1495,54 @@ videoSection.classList.add('hidden');
             submitBtn.innerText = t.submitBtnImg;
         }
     }
+// 🔄 Újrapróbálós Pollinations Videó/Animáció Lelkérő
+async function fetchPollinationsVideoWithRetry(promptText, maxRetries = 3, delayMs = 2000) {
+    const encodedPrompt = encodeURIComponent(promptText);
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            // Minden próbálkozásnál új seed-et adunk hozzá a cache elkerülésére
+            const randomSeed = Math.floor(Math.random() * 1000000);
+            const videoUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&animate=true&seed=${randomSeed}&nologo=true`;
+
+            const response = await fetch(videoUrl, {
+                method: 'GET',
+                credentials: 'omit'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Szerver válaszkód: ${response.status}`);
+            }
+
+            const videoBlob = await response.blob();
+
+            // 🛑 ELLENŐRZÉS: Ha statikus képet (JPEG/PNG) kaptunk videó helyett
+            if (videoBlob.type.includes('image/jpeg') || videoBlob.type.includes('image/png')) {
+                throw new Error("A szerver videó helyett képet küldött vissza (fallback).");
+            }
+
+            // 🛑 ELLENŐRZÉS: Ha nem video vagy animált formátum
+            if (!videoBlob.type.includes('video') && !videoBlob.type.includes('gif')) {
+                throw new Error(`Nem megfelelő válaszformátum: ${videoBlob.type}`);
+            }
+
+            // ✅ SIKER: Visszaadjuk a generált Blob URL-t
+            return URL.createObjectURL(videoBlob);
+
+        } catch (error) {
+            console.warn(`Pollinations próbálkozás (${attempt}/${maxRetries}) sikertelen: ${error.message}`);
+
+            // Ha ez volt az utolsó próbálkozás, továbbdobja a hibát
+            if (attempt === maxRetries) {
+                throw new Error(`A videó generálása ${maxRetries} próbálkozás után sem sikerült. A szerver jelenleg leterhelt.`);
+            }
+
+            // Várakozás a következő próbálkozás előtt (pl. 2 mp)
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+}
+        
 async function generateVideoModel() {
     const t = translations[currentLang] || translations.hu;
     const videoElem = document.getElementById('generatedVideo');
@@ -1515,24 +1576,38 @@ async function generateVideoModel() {
 
         // 1. Pollinations Ingyenes Videó Modell (Wan 2.1)
         if (selectedModel === 'pollinations-video') {
-            const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=wan&width=1024&height=576&nologo=true`;
-            
-            const response = await fetch(pollinationsUrl, {
-                method: 'GET',
-                credentials: 'omit'
-            });
+            try {
+        // 🔄 Újrapróbálós hívás (Max 3 próbálkozás, próbálkozások között 2000 ms szünet)
+        const finalVideoUrl = await fetchPollinationsVideoWithRetry(promptText, 3, 2000);
 
-            if (!response.ok) {
-                throw new Error(`Pollinations hiba (${response.status}): Nem sikerült a videó generálása.`);
-            }
-const videoBlob = await response.blob();
+        // Videó betöltése az elembe Promise segítségével
+        await new Promise((resolve, reject) => {
+            videoElem.onloadeddata = () => resolve();
+            videoElem.onerror = () => reject(new Error(t.errVideoFormat || "A videó formátuma nem lejátszható."));
+            videoElem.src = finalVideoUrl;
+        });
 
-// 🛑 Ellenőrzés: Ha JPEG-et kaptunk videó helyett
-if (videoBlob.type.includes('image')) {
-    throw new Error("A Pollinations jelenleg nem tudott videót generálni, csak képet adott vissza. Próbáld újra pár perc múlva!");
-}
+        // Sikeres megjelenítés frissítése
+        placeholder.classList.add('hidden');
+        videoElem.classList.remove('hidden');
 
-            finalVideoUrl = URL.createObjectURL(videoBlob);
+        downloadBtn.href = finalVideoUrl;
+        downloadBtn.download = `generated-animation-${Date.now()}.mp4`;
+        downloadBtn.classList.remove('hidden');
+
+    } catch (error) {
+        console.error("Videógenerálási hiba:", error);
+        alert(error.message || t.evalErrorDesc || "Hiba történt a videó generálása során.");
+        
+        placeholder.classList.remove('hidden');
+        videoElem.classList.add('hidden');
+        downloadBtn.classList.add('hidden');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = t.submitBtnVid || "🎬 Videó Generálása";
+        }
+    }
         } 
         // 2. Hugging Face Modellek
         else {
