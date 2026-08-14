@@ -408,7 +408,8 @@ body {
                         </a>
                     </div>
                 </div>
-                <div>
+ <div id="videoEvalSection" class="hidden flex flex-col justify-between h-full">
+    <div>
     <h2 id="generatedVidTitle" class="text-xl font-bold mb-4 text-pink-400">Generált Videó</h2>
     <div class="bg-gray-950 p-2 rounded-xl border border-gray-700 min-h-[280px] flex items-center justify-center relative overflow-hidden">
         <!-- Helykitöltő (Placeholder) a videó elkészültéig -->
@@ -427,7 +428,7 @@ body {
         📥 <span id="downloadVidBtnText">Videó Letöltése</span>
     </a>
 </div>
-
+ </div>
 
                 <!-- 3. Zenegeneráló szekció -->
                 <div id="audioEvalSection" class="hidden flex flex-col justify-between h-full">
@@ -1068,7 +1069,7 @@ function setTxt(id, htmlContent) {
         const imageSection = document.getElementById('imageEvalSection');
         const audioSection = document.getElementById('audioEvalSection');
         const aiResponseContainer = document.getElementById('aiResponseContainer');
-
+        const videoSection = document.getElementById('videoEvalSection');
         // Csúszka elemei
         const modelParamContainer = document.getElementById('modelParamContainer');
         const paramLabel = document.getElementById('paramLabel');
