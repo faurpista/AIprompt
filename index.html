@@ -1486,10 +1486,12 @@ async function generateVideoModel() {
     const videoElem = document.getElementById('generatedVideo');
     const placeholder = document.getElementById('videoPlaceholder');
     const downloadBtn = document.getElementById('downloadVidBtn');
-    
+    const apiKeyInput = document.getElementById('apiKey');
     const promptText = promptInput.value.trim();
     const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
     const selectedModel = document.getElementById('modelSelect').value;
+const userPromptInput = document.getElementById('userPrompt');
+        const promptText = userPromptInput ? userPromptInput.value.trim() : '';
 
     if (!promptText) {
         alert(t.promptRequiredError || "Kérlek adj meg egy leírást!");
