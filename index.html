@@ -313,6 +313,8 @@ body {
                          <optgroup id="optGroupAudio" label="🎵 Zenei Modellek">
                             <option value="pollinations-audio">🎵 Pollinations Audio (Ingyenes Zene/Hang)</option>
                             <option value="huggingface-musicgen">🎶 Meta MusicGen (HuggingFace - API kulcs kell)</option>
+                             <option value="ace-step">🎹 ACE-Step 1.5 (HuggingFace - API kulcs kell)</option>
+
                          </optgroup>
                         <optgroup id="optGroupVideo" label="🎬 Videó Modellek">
     <option value="Wan-AI/Wan2.1-T2V-1.3B">🎬 Wan 2.1 (1.3B) (HuggingFace - API kulcs kell)</option>
@@ -551,7 +553,7 @@ body {
     });
 
     const isImageModel = (model) => model === 'pollinations-image' || model.includes('huggingface-flux');
-    const isAudioModel = (model) => model === 'pollinations-audio' || model.includes('audio') || model.includes('music');
+    const isAudioModel = (model) => model === 'pollinations-audio' || model.includes('audio') || model.includes('music') || model.includes('ace');
 const isVideoModel = (model) => 
   model === 'pollinations-video' || 
   model.toLowerCase().includes('video') || 
@@ -1329,35 +1331,50 @@ videoSection.classList.add('hidden');
         // Ha a currentLang pl. 'hu', 'de', 'fr', 'pl', lefordítja angolra a generáláshoz
         const englishPrompt = await translateToEnglishIfNeeded(userPrompt, currentLang);
 
+if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') || selectedModel.includes('ace')) {
+    const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
 
-            if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen')) {
-                const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
+    if (!hfToken) {
+        alert(t.errApiKey || "HuggingFace API token szükséges!");
+        if (submitBtn) { 
+            submitBtn.disabled = false; 
+            submitBtn.innerText = t.submitBtnAudio; 
+        }
+        return;
+    }
 
-                if (!hfToken) {
-                    alert(t.errApiKey || "HuggingFace API token szükséges!");
-                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = t.submitBtnAudio; }
-                    return;
-                }
+    if (audioPlaceholder) {
+        audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren (ACE-Step)...</span>`;
+    }
 
-                if (audioPlaceholder) {
-                    audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren...</span>`;
-                }
-                const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-audio", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        prompt: englishPrompt,
-                        hfToken: hfToken
-                    })
-                });
+    // A legutóbbi, működő végpont meghívása
+    const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-free-audio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            prompt: englishPrompt,
+            hfToken: hfToken
+        })
+    });
 
-                if (!response.ok) {
-                    throw new Error(`Szerver hiba: ${response.status}`);
-                }
+    if (!response.ok) {
+        // Megpróbáljuk kiolvasni a szerver által küldött részletes hibaüzenetet
+        let errorMessage = `Szerver hiba: ${response.status}`;
+        try {
+            const errData = await response.json();
+            if (errData.error) {
+                errorMessage = errData.error;
+            }
+        } catch (e) {
+            // Ha a válasz nem JSON formátumú, marad a státuszkódos hiba
+        }
+        throw new Error(errorMessage);
+    }
 
-                const audioBlob = await response.blob();
-                audioUrl = URL.createObjectURL(audioBlob);
-            } else {
+    const audioBlob = await response.blob();
+    audioUrl = URL.createObjectURL(audioBlob);
+}
+ else {
                 const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
