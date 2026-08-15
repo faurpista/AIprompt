@@ -137,7 +137,11 @@ function updateUIForSelectedModel() {
     setTxt('faq4A', t.faq4A);
     setTxt('faq5Q', t.faq5Q);
     setTxt('faq5A', t.faq5A);
-
+    setTxt('faq6Q', t.faq6Q);
+    setTxt('faq6A', t.faq6A);
+    setTxt('faq7Q', t.faq7Q);
+    setTxt('faq7A', t.faq7A);    
+    
     // 🎧 Audió gombok és szövegek
     setTxt('submitBtnAudio', t.submitBtnAudio);
     setTxt('audioPlaceholder', t.audioPlaceholder);
