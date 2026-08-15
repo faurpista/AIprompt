@@ -1337,7 +1337,7 @@ const englishPrompt = await translateToEnglishIfNeeded(rawText, currentLang);
     // Az API kulcs beviteli mező beazonosítása (módosítsd az ID-t, ha más a te kódban)
     const apiKeyInput = document.getElementById("apiKeyInput") || document.getElementById("hfToken");
 
-    const musicPrompt = englishPrompt ? englishPrompt.value.trim() : "";
+    const musicPrompt = englishPrompt ? englishPrompt.trim() : "";
     const hfToken = apiKeyInput ? apiKeyInput.value.trim() : "";
 
     if (!musicPrompt) {
