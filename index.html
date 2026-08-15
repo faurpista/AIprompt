@@ -1304,7 +1304,7 @@ setTxt('errAudioTimeout', t.errAudioTimeout);
         //document.getElementById('audioPlaceholderText').innerText = t.audioPlaceholderText;
         const audioPlaceholder = document.getElementById('audioPlaceholderText');
         if (audioPlaceholder) audioPlaceholder.innerText = t.audioPlaceholderText;
-        document.getElementById('downloadAudioBtnText').innerText = t.downloadAudioBtnText;
+      //  document.getElementById('downloadAudioBtnText').innerText = t.downloadAudioBtnText;
 
         const selectedModel = document.getElementById("modelSelect").value;
         const apiKeyContainer = document.getElementById('apiKeyContainer');
@@ -1332,8 +1332,8 @@ setTxt('errAudioTimeout', t.errAudioTimeout);
             videoSection.classList.add('hidden');
             // Audio modelleknél elrejtjük a csúszkát
             modelParamContainer.classList.remove('hidden');
-            paramLabel.innerText = t.paramVideoTitle;
-    paramDescription.innerText = t.paramVideoDesc;
+            paramLabel.innerText = t.paramAudioTitle;
+    paramDescription.innerText = t.paramAudioDesc;
         paramSlider.min = "2";
             paramSlider.max = "20";
             paramSlider.step = "0.5";
