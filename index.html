@@ -1331,8 +1331,9 @@ async function generateLyrics() {
     const promptInput = document.getElementById("userPrompt") || document.querySelector("textarea[name='prompt']") || document.querySelector("input[type='text']");
     const lyricsInput = document.getElementById("lyricsInput");
     const genLyricsBtn = document.getElementById("genLyricsBtn");
-    const englishPrompt = await translateToEnglishIfNeeded(promptInput, currentLang);
 
+const rawText = promptInput ? promptInput.value : "";
+const englishPrompt = await translateToEnglishIfNeeded(rawText, currentLang);
     // Az API kulcs beviteli mező beazonosítása (módosítsd az ID-t, ha más a te kódban)
     const apiKeyInput = document.getElementById("apiKeyInput") || document.getElementById("hfToken");
 
