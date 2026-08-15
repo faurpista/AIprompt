@@ -1456,7 +1456,7 @@ if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') 
     if (audioPlaceholder) {
         audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren (ACE-Step)...</span>`;
     }
-
+/*
     // A legutóbbi, működő végpont meghívása
     const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-free-audio", {
         method: "POST",
@@ -1468,6 +1468,36 @@ if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') 
             lyrics: lyricsText    
         })
     });
+    */
+    // 1. Próbálkozás az ACE-STEP-pel
+        let response = await fetch("/api/generate-free-audio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                prompt: promptText,
+                lyrics: lyricsText,
+                duration: durationVal,
+                apiKey: apiKey
+            })
+        });
+
+        // 2. Ha kimerült a ZeroGPU keret (429) -> Automatikus váltás MusicGen-re
+        if (response.status === 429) {
+            console.warn("⚠️ ZeroGPU keret kimerült! Váltás a MusicGen modellre...");
+            if (statusElement) {
+                statusElement.textContent = "⚠️ ZeroGPU keret kimerült! Váltás MusicGen modellre...";
+            }
+
+            // Fallback hívás a sima Inference API-ra
+            response = await fetch("/api/generate-audio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: promptText,
+                    apiKey: apiKey
+                })
+            });
+        }
 
     if (!response.ok) {
         // Megpróbáljuk kiolvasni a szerver által küldött részletes hibaüzenetet
