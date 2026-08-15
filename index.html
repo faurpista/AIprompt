@@ -440,9 +440,9 @@ body {
 
                 <!-- 3. Zenegeneráló szekció -->
                 <div id="audioEvalSection" class="hidden flex flex-col justify-between h-full">
-                  <div class="mt-4">
+        <div id="aceLyricsContainer" class="mt-4 hidden">
     <div class="flex justify-between items-center mb-2">
-        <label for="lyricsInput" class="block text-sm font-medium text-gray-300">
+        <label id="lyricsLabel" for="lyricsInput" class="block text-sm font-medium text-gray-300">
             🎤 Dalszöveg (ACE-Step-hez):
         </label>
         <button 
@@ -459,7 +459,8 @@ body {
         rows="6" 
         placeholder="[Verse]&#10;In the silent night, under glowing skies...&#10;&#10;[Chorus]&#10;Electric hearts burning bright..."
         class="w-full p-3 bg-gray-800 text-gray-100 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono transition"></textarea>
-                  </div>
+</div>
+
                     <div>
                         <h2 id="audioTitle" class="text-xl font-bold mb-4 text-purple-400">🎵 Generált Zene</h2>
                         <div class="bg-gray-950 p-6 rounded-xl border border-gray-700 min-h-[280px] flex flex-col items-center justify-center relative">
@@ -467,7 +468,7 @@ body {
                                 <span class="text-5xl block mb-3" aria-hidden="true">🎧</span>
                                 <span id="audioPlaceholderText" class="text-sm">Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!</span>
                             </div>
-                            <!-- DALSZÖVEG SZEKCIÓ -->
+                            
 
 
                             <div id="audioContainer" class="hidden w-full flex flex-col items-center space-y-4">
@@ -717,7 +718,24 @@ msgAudioFallbackNotice: "Az audió szerver jelenleg leterhelt, próbáld újra p
 errAudioPrompt: "Kérlek, adj meg szöveget a hang generálásához!",
 errAudioApiKey: "A kiválasztott audió modellhez API kulcs megadása szükséges!",
 errAudioFailed: "A hang generálása nem sikerült.",
-errAudioTimeout: "Időtúllépés történt a hang generálása közben."
+errAudioTimeout: "Időtúllépés történt a hang generálása közben.",
+// 🎵 DALSZÖVEG MODUL FORDÍTÁSOK
+
+// 🇭🇺 MAGYAR (translations.hu)
+submitBtnLyrics: "Dalszöveg generálása",
+lyricsPlaceholder: "A generált dalszöveg itt fog megjelenni...",
+generatingLyrics: "Dalszöveg írása folyamatban...",
+downloadLyricsBtn: "Dalszöveg letöltése",
+lyricsGenreLabel: "Zenei műfaj",
+lyricsMoodLabel: "Hangulat",
+lyricsStructureLabel: "Szerkezet (Verse, Chorus, Outro)",
+lyricsNotice: "💡 Tipp: Add meg a témát, az előadó stílusát és a kívánt műfajt!",
+errLyricsPrompt: "Kérlek, adj meg egy témát vagy leírást a dalszöveghez!",
+// 🇭🇺 MAGYAR (translations.hu)
+lyricsLabel: "🎤 Dalszöveg (ACE-Step-hez):",
+genLyricsBtn: "✨ Dalszöveg generálása",
+lyricsPlaceholder: "[Verse]\nAz csendes éjszakában, a fénylő ég alatt...\n\n[Chorus]\nÉgnek az elektromos szívek..."
+            
             
         
 
@@ -828,7 +846,23 @@ msgAudioFallbackNotice: "The audio server is currently busy, please try again in
 errAudioPrompt: "Please enter text for audio generation!",
 errAudioApiKey: "API key is required for the selected audio model!",
 errAudioFailed: "Failed to generate audio.",
-errAudioTimeout: "Audio generation timed out."
+errAudioTimeout: "Audio generation timed out.",
+// 🇬🇧 ENGLISH (translations.en)
+submitBtnLyrics: "Generate Lyrics",
+lyricsPlaceholder: "Generated lyrics will appear here...",
+generatingLyrics: "Writing lyrics...",
+downloadLyricsBtn: "Download Lyrics",
+lyricsGenreLabel: "Music Genre",
+lyricsMoodLabel: "Mood",
+lyricsStructureLabel: "Structure (Verse, Chorus, Outro)",
+lyricsNotice: "💡 Tip: Specify the topic, artist style, and desired genre!",
+errLyricsPrompt: "Please enter a topic or description for the lyrics!",
+// 🇬🇧 ENGLISH (translations.en)
+lyricsLabel: "🎤 Lyrics (for ACE-Step):",
+genLyricsBtn: "✨ Generate Lyrics",
+lyricsPlaceholder: "[Verse]\nIn the silent night, under glowing skies...\n\n[Chorus]\nElectric hearts burning bright..."
+            
+        
             
 
         },
@@ -939,7 +973,22 @@ msgAudioFallbackNotice: "Der Audioserver ist derzeit ausgelastet, bitte versuche
 errAudioPrompt: "Bitte geben Sie Text für die Audiogenerierung ein!",
 errAudioApiKey: "Für das ausgewählte Audio-Modell ist ein API-Schlüssel erforderlich!",
 errAudioFailed: "Audiogenerierung fehlgeschlagen.",
-errAudioTimeout: "Zeitüberschreitung bei der Audiogenerierung."
+errAudioTimeout: "Zeitüberschreitung bei der Audiogenerierung.",
+// 🇩🇪 DEUTSCH (translations.de)
+submitBtnLyrics: "Songtext generieren",
+lyricsPlaceholder: "Der generierte Songtext wird hier angezeigt...",
+generatingLyrics: "Songtext wird geschrieben...",
+downloadLyricsBtn: "Songtext herunterladen",
+lyricsGenreLabel: "Musikgenre",
+lyricsMoodLabel: "Stimmung",
+lyricsStructureLabel: "Struktur (Strophe, Refrain, Outro)",
+lyricsNotice: "💡 Tipp: Geben Sie Thema, Künstlerstil und gewünschtes Genre an!",
+errLyricsPrompt: "Bitte geben Sie ein Thema oder eine Beschreibung für den Songtext ein!",
+// 🇩🇪 DEUTSCH (translations.de)
+lyricsLabel: "🎤 Songtext (für ACE-Step):",
+genLyricsBtn: "✨ Songtext generieren",
+lyricsPlaceholder: "[Verse]\nIn der stillen Nacht, unter leuchtendem Himmel...\n\n[Chorus]\nElektrische Herzen brennen hell..."
+            
             
             
         },
@@ -1050,7 +1099,23 @@ msgAudioFallbackNotice: "Le serveur audio est actuellement surchargé, veuillez 
 errAudioPrompt: "Veuillez saisir du texte pour la génération audio !",
 errAudioApiKey: "Une clé API est requise pour le modèle audio sélectionné !",
 errAudioFailed: "Échec de la génération audio.",
-errAudioTimeout: "Délai d'attente dépassé pour la génération audio."
+errAudioTimeout: "Délai d'attente dépassé pour la génération audio.",
+// 🇫🇷 FRANÇAIS (translations.fr)
+submitBtnLyrics: "Générer les paroles",
+lyricsPlaceholder: "Les paroles générées apparaîtront ici...",
+generatingLyrics: "Écriture des paroles en cours...",
+downloadLyricsBtn: "Télécharger les paroles",
+lyricsGenreLabel: "Genre musical",
+lyricsMoodLabel: "Ambiance",
+lyricsStructureLabel: "Structure (Couplet, Refrain, Outro)",
+lyricsNotice: "💡 Conseil : Précisez le sujet, le style de l'artiste et le genre souhaité !",
+errLyricsPrompt: "Veuillez saisir un sujet ou une description pour les paroles !",
+// 🇫🇷 FRANÇAIS (translations.fr)
+lyricsLabel: "🎤 Paroles (pour ACE-Step):",
+genLyricsBtn: "✨ Générer les paroles",
+lyricsPlaceholder: "[Verse]\nDans la nuit silencieuse, sous les cieux lumineux...\n\n[Chorus]\nDes cœurs électriques brûlent..."
+            
+        
             
             
         },
@@ -1159,8 +1224,21 @@ msgAudioFallbackNotice: "Serwer audio jest obecnie przeciążony, spróbuj ponow
 errAudioPrompt: "Wprowadź tekst do wygenerowania dźwięku!",
 errAudioApiKey: "Wymagany jest klucz API dla wybranego modelu audio!",
 errAudioFailed: "Nie udało się wygenerować dźwięku.",
-errAudioTimeout: "Upłynął limit czasu generowania dźwięku."
-            
+errAudioTimeout: "Upłynął limit czasu generowania dźwięku.",
+// 🇵🇱 POLSKI (translations.pl)
+submitBtnLyrics: "Generuj tekst piosenki",
+lyricsPlaceholder: "Wygenerowany tekst piosenki pojawi się tutaj...",
+generatingLyrics: "Pisanie tekstu piosenki...",
+downloadLyricsBtn: "Pobierz tekst piosenki",
+lyricsGenreLabel: "Gatunek muzyczny",
+lyricsMoodLabel: "Nastroj",
+lyricsStructureLabel: "Struktura (Zwrotka, Refren, Outro)",
+lyricsNotice: "💡 Wskazówka: Określ temat, styl wykonawcy i żądany gatunek!",
+errLyricsPrompt: "Wprowadź temat lub opis tekstu piosenki!",
+// 🇵🇱 POLSKI (translations.pl)
+lyricsLabel: "🎤 Tekst piosenki (dla ACE-Step):",
+genLyricsBtn: "✨ Generuj tekst piosenki",
+lyricsPlaceholder: "[Verse]\nW cichą noc, pod świecącym niebem...\n\n[Chorus]\nElektryczne serca płoną..."            
            
 
         }
@@ -1292,7 +1370,27 @@ setTxt('errAudioPrompt', t.errAudioPrompt);
 setTxt('errAudioApiKey', t.errAudioApiKey);
 setTxt('errAudioFailed', t.errAudioFailed);
 setTxt('errAudioTimeout', t.errAudioTimeout);
+// 🎵 Dalszöveg modul elemeinek frissítése
+setTxt('submitBtnLyrics', t.submitBtnLyrics);
+setTxt('lyricsPlaceholder', t.lyricsPlaceholder);
+setTxt('generatingLyrics', t.generatingLyrics);
+setTxt('downloadLyricsBtn', t.downloadLyricsBtn);
+setTxt('lyricsGenreLabel', t.lyricsGenreLabel);
+setTxt('lyricsMoodLabel', t.lyricsMoodLabel);
+setTxt('lyricsStructureLabel', t.lyricsStructureLabel);
+setTxt('lyricsNotice', t.lyricsNotice);
+setTxt('errLyricsPrompt', t.errLyricsPrompt);
 
+// 🎤 Ace Dalszöveg elemek frissítése
+setTxt('lyricsLabel', t.lyricsLabel);
+setTxt('genLyricsBtn', t.genLyricsBtn);
+
+// Textarea placeholder beállítása
+const lyricsInput = document.getElementById('lyricsInput');
+if (lyricsInput) {
+    lyricsInput.placeholder = t.lyricsPlaceholder;
+        }
+        
         // Kép és Zene panel szövegek
         document.getElementById('generatedImgTitle').innerText = t.generatedImgTitle;
         document.getElementById('downloadBtnText').innerText = t.downloadImgBtnText;
