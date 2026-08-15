@@ -1,4 +1,44 @@
+   document.addEventListener('contextmenu', e => {
+        if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+        }
+    });
 
+    const isImageModel = (model) => model === 'pollinations-image' || model.includes('flux');
+    const isAudioModel = (model) => model === 'pollinations-audio' || model.includes('audio') || model.includes('music') || model.includes('ace');
+const isVideoModel = (model) => 
+  model === 'pollinations-video' || 
+  model.toLowerCase().includes('video') || 
+  model.toLowerCase().includes('t2v') || 
+  model.toLowerCase().includes('wan');
+// 🌐 Automatikus fordítás Angolra (ha a kiválasztott nyelv nem angol)
+async function translateToEnglishIfNeeded(text, sourceLang) {
+    // Ha a felhasználó nyelve már amúgy is angol ('en'), nem fordítunk
+    if (sourceLang === 'en' || !text.trim()) {
+        return text;
+    }
+
+    try {
+        // Ingyenes MyMemory Translation API hívás
+        const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|en`;
+        
+        const response = await fetch(apiUrl);
+        if (!response.ok) return text; // Ha a fordító szerver nem válaszol, marad az eredeti
+
+        const data = await response.json();
+        
+        if (data && data.responseData && data.responseData.translatedText) {
+            const translated = data.responseData.translatedText.trim();
+            console.log(`🌐 Fordítás (${sourceLang} -> en): "${text}" ➔ "${translated}"`);
+            return translated;
+        }
+    } catch (error) {
+        console.warn("Fordítási hiba, az eredeti promptot használjuk:", error);
+    }
+
+    // Ha bármi hiba történne, biztonsági tartalékként az eredeti szöveggel megyünk tovább
+    return text;
+}
 
     let currentLang = 'hu';
 
