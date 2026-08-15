@@ -1326,7 +1326,12 @@ if (lyricsInput) {
             imageSection.classList.add('hidden');
             audioSection.classList.remove('hidden');
             videoSection.classList.add('hidden');
-            // Audio modelleknél elrejtjük a csúszkát
+            const aceLyricsContainer = document.getElementById('aceLyricsContainer');
+    
+    if (aceLyricsContainer) {
+        const isAce = selectedModel.toLowerCase().includes('ace');
+        aceLyricsContainer.classList.toggle('hidden', !isAce);
+    }
             modelParamContainer.classList.remove('hidden');
             paramLabel.innerText = t.paramAudioTitle;
     paramDescription.innerText = t.paramAudioDesc;
@@ -1462,16 +1467,9 @@ videoSection.classList.add('hidden');
         const selectedModel = document.getElementById("modelSelect").value;
        
         if (isAudioModel(selectedModel)) {
-    const aceLyricsContainer = document.getElementById('aceLyricsContainer');
-    if (aceLyricsContainer) {
-        const isAce = selectedModel.toLowerCase().includes('ace');
-        // Ha ACE modell, törli a 'hidden'-t (megjelenik), ha nem ACE, hozzáadja a 'hidden'-t (elrejtődik)
-        aceLyricsContainer.classList.toggle('hidden', !isAce);
-    }
-
-    await generateAudioModel();
-    return;
-}
+            await generateAudioModel();
+            return;
+         }
 
         
         if (isImageModel(selectedModel)) {
