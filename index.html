@@ -1562,11 +1562,19 @@ videoSection.classList.add('hidden');
     // FŐ GOMB KEZELŐ
     window.handleExecution = async function() {
         const selectedModel = document.getElementById("modelSelect").value;
-        
+       
         if (isAudioModel(selectedModel)) {
-            await generateAudioModel();
-            return;
-        } 
+    const aceLyricsContainer = document.getElementById('aceLyricsContainer');
+    if (aceLyricsContainer) {
+        const isAce = selectedModel.toLowerCase().includes('ace');
+        // Ha ACE modell, törli a 'hidden'-t (megjelenik), ha nem ACE, hozzáadja a 'hidden'-t (elrejtődik)
+        aceLyricsContainer.classList.toggle('hidden', !isAce);
+    }
+
+    await generateAudioModel();
+    return;
+}
+
         
         if (isImageModel(selectedModel)) {
             await generateImageModel();
