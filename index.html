@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="István Faur">
+    <meta name="description" content="Ingyenes AI prompt értékelő és optimalizáló eszköz. Elemezd promptjaidat szerepkör, kontextus, feladat és korlátozások alapján, majd javítsd az AI válaszok minőségét.">
+    <meta name="keywords" content="AI prompt értékelő, prompt értékelő, AI prompt optimalizáló, prompt engineering, prompt mérnök, ChatGPT prompt, AI prompt tesztelés, prompt javítás">
+    <meta name="theme-color" content="#111827">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://faurpista.github.io/AIprompt/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://faurpista.github.io/AIprompt/">
+    <meta property="og:title" content="AI Prompt Értékelő és Prompt Mérnök Képző">
+    <meta property="og:description" content="Ingyenes AI prompt értékelő és optimalizáló eszköz. Teszteld, értékeld és javítsd AI promptjaidat.">
+    <meta property="og:locale" content="hu_HU">
+    <meta property="og:site_name" content="AI Prompt Akadémia">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="AI Prompt Értékelő és Prompt Mérnök Képző">
+    <meta name="twitter:description" content="Ingyenes eszköz AI promptok tesztelésére, értékelésére és javítására.">
+
+    <!-- PWA & Stílusok -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AI Prompt Értékelő és Prompt Mérnök Képző",
+      "alternateName": "AI Prompt Akadémia",
+      "url": "https://faurpista.github.io/AIprompt/",
+      "description": "Ingyenes AI prompt értékelő és optimalizáló eszköz.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "inLanguage": ["hu", "en", "de", "fr", "pl"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "HUF"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "István Faur"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AI Prompt Akadémia",
+      "alternateName": "AI Prompt Értékelő",
+      "url": "https://faurpista.github.io/AIprompt/"
+    }
+    </script>
+
+    <title>AI Prompt Értékelő és Prompt Mérnök Képző | Ingyenes AI Eszköz</title>
+
+    <!-- Külső szkriptek -->
+  <!--
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+  -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- 1. Először a fordítások töltődnek be -->
+    <script src="translations.js" defer></script>
+    <!-- 2. Utána a fő logikai kód -->
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        <!-- Fejléc & Nyelvválasztó -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="text-center md:text-left">
+                <h1 id="mainTitle" class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+                    AI Prompt Értékelő és Prompt Mérnök Képző
+                </h1>
+                <p id="mainSubtitle" class="text-gray-400 text-lg">
+                    Ingyenes AI prompt értékelő és optimalizáló eszköz. Teszteld, értékeld és fejleszd a promptjaidat szöveges, kép- és zenei AI modellekkel.
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Nyelvválasztó Dropdown -->
+                <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-700">
+                    <span class="text-sm text-gray-400" aria-hidden="true">🌐</span>
+                    <select id="langSelect" aria-label="Nyelv kiválasztása" class="bg-gray-700 text-white p-1.5 rounded border border-gray-600 text-sm focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        <option value="hu">Magyar</option>
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="pl">Polski</option>
+                    </select>
+                </div>                       
+                
+                <!-- Segítség Gomb -->
+                <button id="openReadmeBtn" class="readme-trigger-btn" aria-haspopup="dialog">
+                    📖 <span id="readmeBtnText">Segítség / API Kulcsok</span>
+                </button>
+            </div>
+
+            <!-- Modal felugró ablak -->
+            <div id="readmeModal" class="modal-overlay" role="dialog" aria-labelledby="readmeModalTitle" aria-modal="true">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="readmeModalTitle">Útmutató & API Beállítások</h3>
+                        <button id="closeReadmeBtn" class="modal-close-btn" aria-label="Bezárás">✖</button>
+                    </div>
+                    <div id="readmeContent" class="modal-body">
+                        <p class="text-center text-gray-400">Útmutató betöltése...</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Adományos gomb -->
+        <div class="flex justify-center mb-6">
+            <a href="https://ko-fi.com/istvanfaur" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-lg shadow-md transition duration-200 text-sm">
+                <span aria-hidden="true">☕</span>
+                <span id="donateBtn">Támogasd a projektet</span>
+            </a>
+        </div>
+
+        <!-- Beállítások panel -->
+        <section class="bg-gray-800 p-4 rounded-xl mb-6 border border-gray-700 shadow-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="apiKeyContainer">
+                    <label id="apiKeyLabel" for="apiKey" class="block text-sm font-medium text-gray-400 mb-1">API Kulcs:</label>
+                    <input type="password" id="apiKey" placeholder="GROQ, GEMINI vagy HUGGING FACE API KEY..." class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label id="modelLabel" for="modelSelect" class="block text-sm font-medium text-gray-400 mb-1">Válassz modellt:</label>
+                    <select id="modelSelect" class="w-full p-2.5 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        <optgroup id="optGroupText" label="📝 Szöveges Modellek (API Kulcs kell)">
+                            <option value="gemini-2.5-flash">gemini-2.5-flash (Google)</option>
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Google Free)</option>
+                            <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (Google Free)</option>
+                            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Groq)</option>
+                            <option value="qwen/qwen3.6-27b">Qwen 3.6 27B (Groq)</option>
+                            <option value="openai/gpt-oss-120b">GPT OSS 120B (Groq)</option>
+                            <option value="openai/gpt-oss-20b">GPT-OSS 20B (Groq)</option>
+                            <option value="qwen-2.5-32b">Qwen 2.5 32B (Groq)</option>
+                            <option value="deepseek-r1-distill-qwen-32b">DeepSeek R1 Qwen 32B (Groq)</option>
+                            <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 Llama 70B (Groq)</option>
+                        </optgroup>
+                        
+                        <optgroup id="optGroupImage" label="🎨 Képgeneráló Modell (Ingyenes)">
+                            <option value="pollinations-image">Pollinations.ai (Ingyenes kép)</option>
+                            <option value="huggingface-flux">Hugging Face (Flux.1 Schnell)</option>
+                        </optgroup>
+                        
+                        <optgroup id="optGroupAudio" label="🎵 Zenei Modellek">
+                            <option value="pollinations-audio">🎵 Pollinations Audio (Ingyenes Zene/Hang)</option>
+                            <option value="huggingface-musicgen">🎶 Meta MusicGen (HuggingFace - API kulcs kell)</option>
+                            <option value="ace-step">🎹 ACE-Step 1.5 (HuggingFace - API kulcs kell)</option>
+                        </optgroup>
+
+                        <optgroup id="optGroupVideo" label="🎬 Videó Modellek">
+                            <option value="Wan-AI/Wan2.1-T2V-1.3B">🎬 Wan 2.1 (1.3B) (HuggingFace - API kulcs kell)</option>
+                            <option value="Wan-AI/Wan2.1-T2V-14B">🎥 Wan 2.1 (14B) (HuggingFace - API kulcs kell)</option>
+                            <option value="pollinations-video">📽️ Pollinations Video (Ingyenes Videó)</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Paraméter Állító Csúszka -->
+            <div id="modelParamContainer" class="mt-4 pt-4 border-t border-gray-700 hidden">
+                <div class="flex justify-between items-center mb-1">
+                    <label id="paramLabel" for="paramSlider" class="text-sm font-medium text-cyan-400">Kreativitás (Temperature):</label>
+                    <span id="paramValueDisplay" class="text-sm font-bold bg-gray-700 px-2.5 py-0.5 rounded text-white">0.3</span>
+                </div>
+                <input type="range" id="paramSlider" min="0" max="1" step="0.05" value="0.3" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                <p id="paramDescription" class="text-xs text-gray-400 mt-1.5 italic"></p>
+            </div>
+
+            <p id="apiNoteText" class="text-xs text-gray-500 mt-2"></p>
+        </section>
+
+        <!-- Fő munkafelület Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Bal oldal: Prompt beviteli mező -->
+            <section class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
+                <div>
+                    <h2 id="promptBoxTitle" class="text-xl font-bold mb-4 text-cyan-400">Írd ide a promptodat</h2>
+                    <p id="promptTipText" class="text-xs text-gray-400 mb-2"></p>
+                    <textarea id="userPrompt" rows="8" aria-label="AI Prompt beviteli mező" class="w-full p-3 bg-gray-700 rounded-lg text-white border border-gray-600 focus:outline-none focus:border-cyan-500 mb-4 resize-none"></textarea>
+                </div>
+                <button onclick="handleExecution()" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md transition duration-200 cursor-pointer">
+                    Tesztelés és Értékelés
+                </button>
+            </section>
+
+            <!-- Jobb oldal: Értékelő és Generált Média Megjelenítő Panel -->
+            <section class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                <!-- 1. Szöveg értékelő szekció -->
+                <div id="textEvalSection">
+                    <h2 id="evalTitle" class="text-xl font-bold mb-4 text-cyan-400">AI Kiértékelés</h2>
+                    
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="relative w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full border-4 border-gray-600" id="scoreCircle">
+                            <span class="text-2xl font-black text-white" id="scoreText">0%</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg" id="ratingLabel">Várakozás a promptra...</h3>
+                            <p class="text-sm text-gray-400" id="ratingDesc">Kattints a gombra az elemzéshez.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblRole">Szerepkör (Role)</span><span id="p-role">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-role" class="bg-cyan-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblContext">Kontextus (Context)</span><span id="p-context">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-context" class="bg-blue-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblTask">Feladat (Task)</span><span id="p-task">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-task" class="bg-purple-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span id="lblConstraints">Korlátozások (Constraints)</span><span id="p-constraints">0%</span></div>
+                            <div class="w-full bg-gray-700 h-2 rounded"><div id="b-constraints" class="bg-pink-500 h-2 rounded transition-all duration-500" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-950 p-4 rounded-lg border border-gray-700 max-h-48 overflow-y-auto">
+                        <h4 id="feedbackTitle" class="text-xs font-bold uppercase text-gray-400 mb-1">Javaslat a javításra:</h4>
+                        <p id="feedbackText" class="text-sm text-gray-300 italic">Itt fog megjelenni az AI részletes tanácsa...</p>
+                    </div>
+                </div>
+
+                <!-- 2. Képgeneráló szekció -->
+                <div id="imageEvalSection" class="hidden flex flex-col justify-between h-full">
+                    <div>
+                        <h2 id="generatedImgTitle" class="text-xl font-bold mb-4 text-pink-400">Generált Kép</h2>
+                        <div class="bg-gray-950 p-2 rounded-xl border border-gray-700 min-h-[280px] flex items-center justify-center relative overflow-hidden">
+                            <div id="imagePlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-4xl block mb-2" aria-hidden="true">🖼️</span>
+                                <span id="imagePlaceholderText">Írj egy leírást angolul a jobb eredményért, majd kattints a generálás gombra!</span>
+                            </div>
+                            <img id="generatedImage" class="w-full h-auto max-h-[350px] object-contain rounded-lg hidden shadow-lg" alt="AI által generált kép" />
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a id="downloadImgBtn" href="#" download="generated-image.png" class="hidden w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-center shadow-md transition duration-200">
+                            📥 <span id="downloadBtnText">Kép Letöltése</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. Videógeneráló szekció -->
+                <div id="videoEvalSection" class="hidden flex flex-col justify-between h-full">
+                    <div>
+                        <h2 id="generatedVidTitle" class="text-xl font-bold mb-4 text-pink-400">Generált Videó</h2>
+                        <div id="videoNotice" class="hidden mb-3 p-3 bg-amber-900/40 border border-amber-500/50 rounded-lg text-amber-200 text-xs font-medium text-center"></div>
+                        <div class="bg-gray-950 p-2 rounded-xl border border-gray-700 min-h-[280px] flex items-center justify-center relative overflow-hidden">
+                            <div id="videoPlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-4xl block mb-2" aria-hidden="true">🎬</span>
+                                <span id="videoPlaceholderText">Írj egy leírást angolul a jobb eredményért, majd kattints a generálás gombra!</span>
+                            </div>
+                            <img id="generatedVideoFallbackImg" class="w-full h-auto max-h-[350px] object-contain rounded-lg hidden shadow-lg" alt="AI által generált kép" />
+                            <video id="generatedVideo" controls class="w-full h-auto max-h-[350px] object-contain rounded-lg hidden shadow-lg"></video>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a id="downloadVidBtn" href="#" download="generated-video.mp4" class="hidden w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-center shadow-md transition duration-200">
+                            📥 <span id="downloadVidBtnText">Videó Letöltése</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4. Zenegeneráló szekció -->
+                <div id="audioEvalSection" class="hidden flex flex-col justify-between h-full">
+                    <div id="aceLyricsContainer" class="mb-4 hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <label id="lyricsLabel" for="lyricsInput" class="block text-sm font-medium text-gray-300">
+                                🎤 Dalszöveg (ACE-Step-hez):
+                            </label>
+                            <button type="button" id="genLyricsBtn" onclick="generateLyrics()" class="text-xs bg-purple-600 hover:bg-purple-700 active:scale-95 text-white py-1.5 px-3 rounded-lg transition duration-200 flex items-center gap-1 shadow-md font-semibold cursor-pointer">
+                                ✨ Dalszöveg generálása
+                            </button>
+                        </div>
+                        <textarea id="lyricsInput" rows="5" placeholder="[Verse]&#10;In the silent night, under glowing skies...&#10;&#10;[Chorus]&#10;Electric hearts burning bright..." class="w-full p-3 bg-gray-800 text-gray-100 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono transition"></textarea>
+                    </div>
+
+                    <div>
+                        <h2 id="audioTitle" class="text-xl font-bold mb-4 text-purple-400">🎵 Generált Zene</h2>
+                        <div class="bg-gray-950 p-6 rounded-xl border border-gray-700 min-h-[280px] flex flex-col items-center justify-center relative">
+                            <div id="audioPlaceholder" class="text-gray-500 text-center p-4">
+                                <span class="text-5xl block mb-3" aria-hidden="true">🎧</span>
+                                <span id="audioPlaceholderText" class="text-sm">Írj le egy zenei stílust angolul (pl. heavy metal, synthwave, acoustic guitar), majd kattints a generálásra!</span>
+                            </div>
+                            
+                            <div id="audioContainer" class="hidden w-full flex flex-col items-center space-y-4">
+                                <div class="w-20 h-20 rounded-full bg-purple-900/50 border-2 border-purple-500 flex items-center justify-center animate-pulse">
+                                    <span class="text-3xl" aria-hidden="true">🎶</span>
+                                </div>
+                                <audio id="generatedAudio" controls class="w-full mt-4 rounded-lg"></audio>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a id="downloadAudioBtn" href="#" download="generated-music.mp3" class="hidden w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-center shadow-md transition duration-200">
+                            📥 <span id="downloadAudioBtnText">Zene Letöltése (.mp3)</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- AI Válasz Panel -->
+        <section id="aiResponseContainer" class="mt-6 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+            <h2 id="aiRespTitle" class="text-lg font-bold mb-2 text-emerald-400">Hogyan válaszolna erre az AI?</h2>
+            <div id="aiResponse" class="bg-gray-900 p-4 rounded-lg text-sm text-gray-300 min-h-16 whitespace-pre-line border border-gray-700">
+                A promptodra adott tényleges AI válasz itt fog megjelenni...
+            </div>
+        </section>
+
+        <!-- SEO & GYIK SZEKCIÓ -->
+        <section id="faqSection" class="mt-12 bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-700 shadow-xl">
+            <div class="mb-8 text-center md:text-left">
+                <h2 id="faqTitle" class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2"></h2>
+                <p id="faqSubtitle" class="text-gray-400 text-sm md:text-base"></p>
+            </div>
+
+            <div class="space-y-4">
+                <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                        <span id="faq1Q"></span>
+                        <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+                    </summary>
+                    <p id="faq1A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3"></p>
+                </details>
+
+                <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                        <span id="faq2Q"></span>
+                        <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+                    </summary>
+                    <p id="faq2A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3"></p>
+                </details>
+
+                <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                        <span id="faq3Q"></span>
+                        <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+                    </summary>
+                    <p id="faq3A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3"></p>
+                </details>
+
+                <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                        <span id="faq4Q"></span>
+                        <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+                    </summary>
+                    <p id="faq4A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3"></p>
+                </details>
+
+                <details class="group bg-gray-900 border border-gray-700 rounded-lg p-4 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer text-white font-semibold text-lg hover:text-cyan-400 transition-colors">
+                        <span id="faq5Q"></span>
+                        <span class="ml-2 transition-transform duration-300 group-open:-rotate-180 text-cyan-400">▼</span>
+                    </summary>
+                    <p id="faq5A" class="mt-3 text-gray-300 text-sm md:text-base leading-relaxed border-t border-gray-800 pt-3"></p>
+                </details>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
