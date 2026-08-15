@@ -1474,10 +1474,10 @@ if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                prompt: promptText,
-                lyrics: lyricsText,
-                duration: durationVal,
-                apiKey: apiKey
+                prompt: englishPrompt,
+                hfToken: hfToken,
+                duration: audioDuration, // 👈 Itt adjuk át a hosszt!
+                lyrics: lyricsText
             })
         });
 
@@ -1493,7 +1493,7 @@ if (selectedModel.includes('huggingface') || selectedModel.includes('musicgen') 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    prompt: promptText,
+                    prompt: englishPrompt,
                     apiKey: apiKey
                 })
             });
