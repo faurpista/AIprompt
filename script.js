@@ -524,7 +524,7 @@ async function generateAudioModel() {
                    body: JSON.stringify({
                         prompt: englishPrompt,
                         hfToken: hfToken,
-                        duration: duration || 10 // Kliens által kiválasztott időtartam
+                        duration: audioDuration || 10 // Kliens által kiválasztott időtartam
                    }),
                    signal: controller.signal
               });
