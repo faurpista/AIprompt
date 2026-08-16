@@ -495,6 +495,9 @@ async function generateAudioModel() {
             if (audioPlaceholder) {
                 audioPlaceholder.innerHTML = `<span class="animate-pulse text-purple-400 font-bold">🎶 Zene generálása a szerveren (ACE-Step)...</span>`;
             }
+           // 1. 90 másodperces időtúllépési keret beállítása
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 90000);
 
             let response = await fetch("https://musicgen-proxy.onrender.com/api/generate-free-audio", {
                 method: "POST",
@@ -502,11 +505,12 @@ async function generateAudioModel() {
                 body: JSON.stringify({
                     prompt: englishPrompt,
                     hfToken: hfToken,
-                    duration: audioDuration,
-                    lyrics: lyricsText
-                })
+                    duration: audioDuration || 7,
+                    lyrics: lyricsText || ""
+                }),
+                signal: controller.signal
             });
-
+            clearTimeout(timeoutId);
             if (response.status === 429) {
                 console.warn("⚠️ ZeroGPU keret kimerült! Váltás a MusicGen modellre...");
                 if (audioPlaceholder) {
