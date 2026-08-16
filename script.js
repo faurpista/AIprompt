@@ -513,14 +513,24 @@ async function generateAudioModel() {
                     audioPlaceholder.textContent = "⚠️ ZeroGPU keret kimerült! Váltás MusicGen modellre...";
                 }
 
-                response = await fetch("https://musicgen-proxy.onrender.com/api/generate-audio", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+           // 90 másodperces időkeret beállítása
+           const controller = new AbortController();
+           const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+           try {
+               response = await fetch("/api/generate-audio", { // vagy a saját backend elérési utad
+                   method: "POST",
+                   headers: { "Content-Type": "application/json" },
+                   body: JSON.stringify({
                         prompt: englishPrompt,
-                        apiKey: hfToken
-                    })
-                });
+                        hfToken: hfToken,
+                        duration: duration || 10 // Kliens által kiválasztott időtartam
+                   }),
+                   signal: controller.signal
+              });
+            } finally {
+                 clearTimeout(timeoutId); // Megállítás, ha időben megérkezett a válasz
+            }
             }
 
             if (!response.ok) {
