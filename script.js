@@ -1062,7 +1062,7 @@ IMPORTANT LANGUAGE RULE: All output values ("rating", "feedback", "ai_response")
             responseText = rawContent;
 
         } else if (selectedModel.includes('gemini')) {
-            const response = await fetch(`[https://generativelanguage.googleapis.com/v1beta/models/$](https://generativelanguage.googleapis.com/v1beta/models/$){selectedModel}:generateContent?key=${apiKey}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
