@@ -590,46 +590,25 @@ async function generateAudioModel() {
         // 1. LÉPÉS: A prompt URL-biztossá tétele (speciális karakterek és szóközök kezelése)
         const encodedPrompt = encodeURIComponent(englishPrompt);
         
-        // 2. LÉPÉS: A helyes GET URL összeállítása a Pollinations audio modelljével
-        const audioApiUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio`;
+        // Helyes Sound API URL
+        const audioUrl = `https://sound.pollinations.ai/prompt/${encodedPrompt}`;
 
-        console.log(`🌐 Kérés küldése a Pollinations API-nak: ${audioApiUrl}`);
+        const response = await fetch(audioUrl);
+        if (!response.ok) throw new Error(`HTTP hiba: ${response.status}`);
 
-        // 3. LÉPÉS: A GET kérés elküldése
-        const response = await fetch(audioApiUrl, {
-            method: "GET",
-            headers: {
-                "Accept": "audio/mpeg, audio/mp3, audio/*"
-            }
-        });
+        // Böngészőben a Blob hatékonyabb, mint a Base64
+        const blob = await response.blob();
+        const playableUrl = URL.createObjectURL(blob);
 
-        // 4. LÉPÉS: Hibakezelés (ha a válasz HTTP státusza nem 200 OK)
-        if (!response.ok) {
-            throw new Error(`A Pollinations API hibát küldött: HTTP ${response.status}`);
-        }
+        // Audio azonnali lejátszása
+        const player = new Audio(playableUrl);
+        await player.play();
+        console.log("🔊 Zene lejátszása elindult!");
 
-        // 5. LÉPÉS: A bináris audio válasz beolvasása ArrayBuffer-ként
-        const arrayBuffer = await response.arrayBuffer();
-
-        if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-            throw new Error("A Pollinations nem küldött audio adatot.");
-        }
-
-        // 6. LÉPÉS: Bináris adat átalakítása Base64 formátumra (Node.js alatt)
-        const buffer = Buffer.from(arrayBuffer);
-        const audioBase64 = buffer.toString("base64");
-
-        // 7. LÉPÉS: A Data URL összeállítása
-        const audioUrl = `data:audio/mp3;base64,${audioBase64}`;
-
-        console.log("✅ Audio sikerült! Data URL elkészült.");
-        return audioUrl;
-
-    } catch (error) {
-        console.error("❌ Hiba történt az audio generálása során:", error.message);
-        throw error;
+    } catch (err) {
+        console.error("❌ Frontend hiba:", err.message);
     }
-//}
+            //}
 
         }
 
