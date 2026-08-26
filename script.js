@@ -551,6 +551,17 @@ async function generateAudioModel() {
             const audioBlob = await response.blob();
             audioUrl = URL.createObjectURL(audioBlob);
         } else {
+            /*
+const response = await fetch('https://a-backend-url-ed.onrender.com/api/generate-pollinations-audio', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: 'Hello, ez egy teszt hang.' })
+});
+const audioBlob = await response.blob();
+const audioUrl = URL.createObjectURL(audioBlob);
+const audio = new Audio(audioUrl);
+audio.play();
+    */        
             const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -561,7 +572,18 @@ async function generateAudioModel() {
                     messages: [{ role: "user", content: englishPrompt }]
                 })
             });
-
+/*
+        const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-pollinations-audio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "openai-audio",
+                    modalities: ["text", "audio"],
+                    audio: { voice: "alloy", format: "mp3" },
+                    messages: [{ role: "user", content: englishPrompt }]
+                })
+            });    
+            */
             if (!response.ok) {
                 throw new Error(`Pollinations hiba: ${response.status}`);
             }
