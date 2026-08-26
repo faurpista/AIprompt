@@ -444,6 +444,45 @@ Keep it concise and perfect for AI audio synthesis.`;
 }
 
 // 🎵 ZENEGENERÁLÁS
+
+/**
+ * Pollinations Audio Generálása
+ * @param {string} englishPrompt - A zenei vagy beszéd prompt angolul
+ * @returns {Promise<Buffer|Blob>} A visszakapott audio adat
+ */
+async function generatePollinationsAudio(englishPrompt) {
+    try {
+        // A prompt URL-kompatibilis kodolasa
+        const encodedPrompt = encodeURIComponent(englishPrompt);
+        
+        // A helyes Pollinations Audio URL (GET kérés)
+        const url = `https://text.pollinations.ai/${encodedPrompt}?model=audio`;
+
+        console.log(`🎵 Kérés küldése: ${url}`);
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Accept": "audio/mpeg, audio/wav, audio/*"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Pollinations Audio Hiba: HTTP ${response.status}`);
+        }
+
+        // Böngészőben blobként, Node.js-ben bufferként dolgozzuk fel
+        const audioBuffer = await response.arrayBuffer();
+        console.log("✅ Audio sikeresen letöltve!");
+        return audioBuffer;
+
+    } catch (error) {
+        console.error("❌ Hiba az audio generálása során:", error.message);
+        throw error;
+    }
+}
+
+
 async function generateAudioModel() {
     const lang = (typeof currentLang !== 'undefined') ? currentLang : 'hu';
     const transObj = (typeof translations !== 'undefined') ? translations : null;
@@ -561,7 +600,7 @@ const audioBlob = await response.blob();
 const audioUrl = URL.createObjectURL(audioBlob);
 const audio = new Audio(audioUrl);
 audio.play();
-    */        
+            
             const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -572,7 +611,7 @@ audio.play();
                     messages: [{ role: "user", content: englishPrompt }]
                 })
             });
-/*
+
         const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-pollinations-audio", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -584,6 +623,7 @@ audio.play();
                 })
             });    
             */
+            generatePollinationsAudio(englishPrompt);
             if (!response.ok) {
                 throw new Error(`Pollinations hiba: ${response.status}`);
             }
