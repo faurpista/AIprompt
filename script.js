@@ -450,38 +450,6 @@ Keep it concise and perfect for AI audio synthesis.`;
  * @param {string} englishPrompt - A zenei vagy beszéd prompt angolul
  * @returns {Promise<Buffer|Blob>} A visszakapott audio adat
  */
-async function generatePollinationsAudio(englishPrompt) {
-    try {
-        // A prompt URL-kompatibilis kodolasa
-        const encodedPrompt = encodeURIComponent(englishPrompt);
-        
-        // A helyes Pollinations Audio URL (GET kérés)
-        const url = `https://text.pollinations.ai/${encodedPrompt}?model=audio`;
-
-        console.log(`🎵 Kérés küldése: ${url}`);
-
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "Accept": "audio/mpeg, audio/wav, audio/*"
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Pollinations Audio Hiba: HTTP ${response.status}`);
-        }
-
-        // Böngészőben blobként, Node.js-ben bufferként dolgozzuk fel
-        const audioBuffer = await response.arrayBuffer();
-        console.log("✅ Audio sikeresen letöltve!");
-        return audioBuffer;
-
-    } catch (error) {
-        console.error("❌ Hiba az audio generálása során:", error.message);
-        throw error;
-    }
-}
-
 
 async function generateAudioModel() {
     const lang = (typeof currentLang !== 'undefined') ? currentLang : 'hu';
@@ -591,16 +559,6 @@ async function generateAudioModel() {
             audioUrl = URL.createObjectURL(audioBlob);
         } else {
             /*
-const response = await fetch('https://a-backend-url-ed.onrender.com/api/generate-pollinations-audio', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: 'Hello, ez egy teszt hang.' })
-});
-const audioBlob = await response.blob();
-const audioUrl = URL.createObjectURL(audioBlob);
-const audio = new Audio(audioUrl);
-audio.play();
-            
             const response = await fetch("https://text.pollinations.ai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -612,22 +570,6 @@ audio.play();
                 })
             });
 
-        const response = await fetch("https://musicgen-proxy.onrender.com/api/generate-pollinations-audio", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "openai-audio",
-                    modalities: ["text", "audio"],
-                    audio: { voice: "alloy", format: "mp3" },
-                    messages: [{ role: "user", content: englishPrompt }]
-                })
-            });    
-            */
-            generatePollinationsAudio(englishPrompt);
-            if (!response.ok) {
-                throw new Error(`Pollinations hiba: ${response.status}`);
-            }
-
             const data = await response.json();
             const audioBase64 = data.choices?.[0]?.message?.audio?.data;
 
@@ -636,6 +578,59 @@ audio.play();
             }
 
             audioUrl = `data:audio/mp3;base64,${audioBase64}`;
+            */
+            /**
+ * Audio generálása a Pollinations API segítségével
+ * 
+ * @param {string} englishPrompt - Az angol nyelvű prompt a hang generálásához
+ * @returns {Promise<string>} - A generált audio Data URL-je (data:audio/mp3;base64,...)
+ */
+//async function generatePollinationsAudio(englishPrompt) {
+    try {
+        // 1. LÉPÉS: A prompt URL-biztossá tétele (speciális karakterek és szóközök kezelése)
+        const encodedPrompt = encodeURIComponent(englishPrompt);
+        
+        // 2. LÉPÉS: A helyes GET URL összeállítása a Pollinations audio modelljével
+        const audioApiUrl = `https://text.pollinations.ai/${encodedPrompt}?model=audio`;
+
+        console.log(`🌐 Kérés küldése a Pollinations API-nak: ${audioApiUrl}`);
+
+        // 3. LÉPÉS: A GET kérés elküldése
+        const response = await fetch(audioApiUrl, {
+            method: "GET",
+            headers: {
+                "Accept": "audio/mpeg, audio/mp3, audio/*"
+            }
+        });
+
+        // 4. LÉPÉS: Hibakezelés (ha a válasz HTTP státusza nem 200 OK)
+        if (!response.ok) {
+            throw new Error(`A Pollinations API hibát küldött: HTTP ${response.status}`);
+        }
+
+        // 5. LÉPÉS: A bináris audio válasz beolvasása ArrayBuffer-ként
+        const arrayBuffer = await response.arrayBuffer();
+
+        if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+            throw new Error("A Pollinations nem küldött audio adatot.");
+        }
+
+        // 6. LÉPÉS: Bináris adat átalakítása Base64 formátumra (Node.js alatt)
+        const buffer = Buffer.from(arrayBuffer);
+        const audioBase64 = buffer.toString("base64");
+
+        // 7. LÉPÉS: A Data URL összeállítása
+        const audioUrl = `data:audio/mp3;base64,${audioBase64}`;
+
+        console.log("✅ Audio sikerült! Data URL elkészült.");
+        return audioUrl;
+
+    } catch (error) {
+        console.error("❌ Hiba történt az audio generálása során:", error.message);
+        throw error;
+    }
+//}
+
         }
 
         if (audioElement) {
